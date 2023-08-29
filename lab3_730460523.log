@@ -1,0 +1,104 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+363        
+364        /****************************************************************************
+365        *
+366        * Project : BIOS 511 Lab 3
+367        *
+368        * Program name : lab3_730460523.sas
+369        *
+370        * Author : Katie Chai
+371        *
+372        * Date created : 2023-08-28
+373        *
+374        * Purpose : This program is designed to apply the key points of the lecture:
+375        * 1) librefs (temporary and permanent data sets)
+376        * 2) global statements
+377        * 3) system options
+378        * 4) product documentation
+379        *
+380        * Revision History :
+381        *
+382        *
+383        *
+384        * Note: Standard header taken from :
+385        * https://www.phusewiki.org/wiki/index.php?title=Program_Header
+386        ****************************************************************************/
+387        
+388        %put %upcase(no)TE: Program being run by 730460523;
+NOTE: Program being run by 730460523
+389        options nofullstimer;
+390        
+391        * assigns libref for class data;
+392        LIBNAME classDat "/home/u63543119/my_shared_file_links/u49231441/Data" access=readonly;
+NOTE: Libref CLASSDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/my_shared_file_links/u49231441/Data
+393        
+394        * assigns libref for my data;
+395        LIBNAME myDat "/home/u63543119/BIOS511/Data";
+NOTE: Libref MYDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/BIOS511/Data
+396        
+397        * creates temp data set from dmv data set using libref;
+398        data tempDat;
+399        set classDat.dmvs;
+400        run;
+
+NOTE: There were 602 observations read from the data set CLASSDAT.DMVS.
+NOTE: The data set WEBWORK.TEMPDAT has 602 observations and 20 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.00 seconds
+41                                                         The SAS System                        Monday, August 28, 2023 10:32:32 AM
+
+      
+
+401        
+402        * creates + stores perm data set from dmv data set using libref;
+403        data myDat.permDat;
+404        set classDat.dmvs;
+405        run;
+
+NOTE: There were 602 observations read from the data set CLASSDAT.DMVS.
+NOTE: The data set MYDAT.PERMDAT has 602 observations and 20 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+406        
+407        * prints first 5 observations from temp data set above with title + footnote;
+408        title1 "DMV Data";
+409        footnote "Practice printing a temporary dataset with a libname.";
+410        proc print data=tempDat(obs=5);
+411        run;
+
+NOTE: There were 5 observations read from the data set WEBWORK.TEMPDAT.
+NOTE: The PROCEDURE PRINT printed page 10.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.02 seconds
+      
+
+412        
+413        * returns year cutoff option;
+414        proc options option=YEARCUTOFF;
+415        run;
+
+    SAS (r) Proprietary Software Release 9.4  TS1M7
+
+ YEARCUTOFF=2000   Specifies the first year of a 100-year span that is used by date informats and functions to read a two-digit 
+                   year.
+NOTE: PROCEDURE OPTIONS used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+416        
+417        proc printto; run;
+
