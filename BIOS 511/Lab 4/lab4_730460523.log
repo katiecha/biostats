@@ -1,0 +1,152 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+70         
+71         /****************************************************************************
+72         *
+73         * Project : BIOS 511 Lab 4
+74         *
+75         * Program name : lab4_730460523.sas
+76         *
+77         * Author : Katie Chai
+78         *
+79         * Date created : 2023-09-06
+80         *
+81         * Purpose : This program is designed to apply the key points of the lecture:
+82         * 1) Using PROC SORT to sort data
+83         * 2) Using PROC CONTENTS to obtain variable names
+84         *
+85         * Revision History :
+86         *
+87         * Note: Standard header taken from :
+88         * https://www.phusewiki.org/wiki/index.php?title=Program_Header
+89         ****************************************************************************/
+90         
+91         %put %upcase(no)TE: Program being run by 730460523;
+NOTE: Program being run by 730460523
+92         options nofullstimer;
+93         
+94         * assigns libref for class data;
+95         LIBNAME classDat "/home/u63543119/my_shared_file_links/u49231441/Data" access=readonly;
+NOTE: Libref CLASSDAT refers to the same physical library as _TEMP1.
+NOTE: Libref CLASSDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/my_shared_file_links/u49231441/Data
+96         
+97         * assigns libref for my data;
+98         LIBNAME myDat "/home/u63543119/BIOS511/Data";
+NOTE: Libref MYDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/BIOS511/Data
+99         
+100        * creates temp data set from customer_dim data set;
+101        data custodim;
+102        	set classDat.customer_dim;
+103        run;
+
+NOTE: There were 77 observations read from the data set CLASSDAT.CUSTOMER_DIM.
+NOTE: The data set WORK.CUSTODIM has 77 observations and 11 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+2                                                          The SAS System                  Wednesday, September  6, 2023 10:43:10 AM
+
+
+104        
+105        * sorts custodim data by last name;
+106        proc sort data=custodim out=custodim_1;
+107        	by customer_lastname;
+108        run;
+
+NOTE: There were 77 observations read from the data set WORK.CUSTODIM.
+NOTE: The data set WORK.CUSTODIM_1 has 77 observations and 11 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+109        
+110        * sorts custodim data by group and type, only keeping these variables;
+111        proc sort data=custodim out=custodim_2 (keep=customer_group customer_type) nodupkey;
+112        	by customer_group customer_type;
+113        run;
+
+NOTE: There were 77 observations read from the data set WORK.CUSTODIM.
+NOTE: 70 observations with duplicate key values were deleted.
+NOTE: The data set WORK.CUSTODIM_2 has 7 observations and 2 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+114        
+115        * creates temp data set from drivers data set;
+116        data drive;
+117        	set classDat.drivers;
+118        run;
+
+NOTE: There were 57834 observations read from the data set CLASSDAT.DRIVERS.
+NOTE: The data set WORK.DRIVE has 57834 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+119        
+120        * sorts drive data by cohort;
+121        proc sort data=drive out=drive_1;
+122        	by cohort;
+123        run;
+
+NOTE: There were 57834 observations read from the data set WORK.DRIVE.
+NOTE: The data set WORK.DRIVE_1 has 57834 observations and 5 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+124        
+125        * subsets + sorts drive data into North Carolina drivers and by gender;
+126        proc sort data=drive out=myDat.drive_2;
+127        	where state='North Carolina';
+3                                                          The SAS System                  Wednesday, September  6, 2023 10:43:10 AM
+
+128        	by gender;
+129        run;
+
+NOTE: There were 1134 observations read from the data set WORK.DRIVE.
+      WHERE state='North Carolina';
+NOTE: The data set MYDAT.DRIVE_2 has 1134 observations and 5 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+130        
+131        * print variable names according to the order they are found in the data set;
+132        title 'Proc Contents according to order they are found in the data set.';
+133        proc contents data=custodim_1 varnum;
+134        run;
+
+NOTE: PROCEDURE CONTENTS used (Total process time):
+      real time           0.03 seconds
+      cpu time            0.03 seconds
+      
+
+135        
+136        * suppresses the printing of output --> stores in temp data set;
+137        proc contents data=custodim_1 noprint out=custodim_1_contents;
+138        run;
+
+NOTE: The data set WORK.CUSTODIM_1_CONTENTS has 11 observations and 41 variables.
+NOTE: PROCEDURE CONTENTS used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+139        
+140        proc printto; run;
+

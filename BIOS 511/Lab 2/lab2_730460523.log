@@ -1,0 +1,85 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+70         
+71         /****************************************************************************
+72         *
+73         * Project : BIOS 511 Lab 2
+74         *
+75         * Program name : lab2_730460523.sas
+76         *
+77         * Author : Katie Chai
+78         *
+79         * Date created : 2023-08-23
+80         *
+81         * Purpose : This program is designed to be a template that can be
+82         * reused throughout the BIOS 511 course. It uses PROC CONTENTS,
+83         * PROC PRINT, and DATA.
+84         *
+85         *
+86         *
+87         * Revision History :
+88         *
+89         * Date Author Ref (#) Revision
+90         * N/A
+91         *
+92         * searchable reference phrase: *** [#] ***;
+93         *
+94         * Note: Standard header taken from :
+95         * https://www.phusewiki.org/wiki/index.php?title=Program_Header
+96         ****************************************************************************/
+97         
+98         %put %upcase(no)TE: Program being run by 730460523;
+NOTE: Program being run by 730460523
+99         options nofullstimer;
+100        
+101        /* determines the names of variables in sashelp.orsales */
+102        proc contents data=sashelp.orsales;
+103        run;
+
+NOTE: PROCEDURE CONTENTS used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.03 seconds
+      
+
+104        
+105        /* prints portion of data (first 8 observations) */
+106        proc print data=sashelp.orsales (obs=8);
+107        run;
+
+NOTE: There were 8 observations read from the data set SASHELP.ORSALES.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+2                                                          The SAS System                     Wednesday, August 23, 2023 10:25:29 AM
+
+      cpu time            0.02 seconds
+      
+
+108        
+109        /* creates a new dataset */
+110        data students;
+111        /* creates character and numeric variables */
+112        first_name = "Katie";
+113        last_name = "Chai";
+114        age = 20;
+115        run;
+
+NOTE: The data set WORK.STUDENTS has 1 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+116        proc contents data=students;
+117        run;
+
+NOTE: PROCEDURE CONTENTS used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.02 seconds
+      
+
+118        
+119        proc printto; run;
+
