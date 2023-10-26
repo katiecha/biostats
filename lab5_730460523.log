@@ -1,0 +1,238 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              376.65k
+      OS Memory           22944.00k
+      Timestamp           09/11/2023 02:51:26 PM
+      Step Count                        357  Switch Count  0
+      Page Faults                       0
+      Page Reclaims                     25
+      Page Swaps                        0
+      Voluntary Context Switches        7
+      Involuntary Context Switches      0
+      Block Input Operations            0
+      Block Output Operations           0
+      
+
+70         
+71         /****************************************************************************
+72         *
+73         * Project : BIOS 511 Lab 5
+74         *
+75         * Program name : lab5_730460523.sas
+76         *
+77         * Author : Katie Chai
+78         *
+79         * Date created : 2023-09-11
+80         *
+81         * Purpose : This program is designed to apply the key points of the lecture:
+82         * 1) Using PROC PRINT to view data
+83         * 2) Using PROC FREQ to obtain counts, frequencies, and statistics
+84         *
+85         * Revision History :
+86         *
+87         * Note: Standard header taken from :
+88         * https://www.phusewiki.org/wiki/index.php?title=Program_Header
+89         ****************************************************************************/
+90         
+91         %put %upcase(no)TE: Program being run by 730460523;
+NOTE: Program being run by 730460523
+92         options nofullstimer;
+93         
+94         /* ------------------------LIBNAME------------------------*/
+95         * assigns libref for class data;
+96         LIBNAME classDat "/home/u63543119/my_shared_file_links/u49231441/Data" access=readonly;
+NOTE: Libref CLASSDAT refers to the same physical library as _TEMP2.
+NOTE: Libref CLASSDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/my_shared_file_links/u49231441/Data
+97         
+98         * assigns libref for my data;
+99         LIBNAME myDat "/home/u63543119/BIOS511/Data";
+NOTE: Libref MYDAT was successfully assigned as follows: 
+      Engine:        V9 
+2                                                          The SAS System                     Monday, September 11, 2023 10:51:26 AM
+
+      Physical Name: /home/u63543119/BIOS511/Data
+100        
+101        /* ------------------------DATA------------------------*/
+102        * creates temp data set fails from sashelp.failure data set;
+103        data fails;
+104        	set sashelp.failure;
+105        run;
+
+NOTE: There were 70 observations read from the data set SASHELP.FAILURE.
+NOTE: The data set WORK.FAILS has 70 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+106        
+107        * creates temp data set employee_donate from employee_donations data set;
+108        data employee_donate;
+109        	set classDat.employee_donations;
+110        run;
+
+NOTE: There were 124 observations read from the data set CLASSDAT.EMPLOYEE_DONATIONS.
+NOTE: The data set WORK.EMPLOYEE_DONATE has 124 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+111        
+112        * creates temp data set custo_dim from customer_dim data set;
+113        data custo_dim;
+114        	set classDat.customer_dim;
+115        run;
+
+NOTE: There were 77 observations read from the data set CLASSDAT.CUSTOMER_DIM.
+NOTE: The data set WORK.CUSTO_DIM has 77 observations and 11 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+116        
+117        * creates temp data set mig from migraine data set;
+118        data mig;
+119        	set classDat.migraine;
+120        run;
+
+NOTE: There were 60 observations read from the data set CLASSDAT.MIGRAINE.
+NOTE: The data set WORK.MIG has 60 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+121        
+122        /* ------------------------SORT------------------------*/
+123        * sorts fails data set by cause;
+124        proc sort data=fails out=fails;
+3                                                          The SAS System                     Monday, September 11, 2023 10:51:26 AM
+
+125        	by cause;
+126        run;
+
+NOTE: There were 70 observations read from the data set WORK.FAILS.
+NOTE: The data set WORK.FAILS has 70 observations and 4 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+127        
+128        * sorts custo_dim data set by customer_name;
+129        proc sort data=custo_dim out=custo_dim nodupkey;
+130        	by customer_name;
+131        run;
+
+NOTE: There were 77 observations read from the data set WORK.CUSTO_DIM.
+NOTE: 2 observations with duplicate key values were deleted.
+NOTE: The data set WORK.CUSTO_DIM has 75 observations and 11 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+132        
+133        /* ------------------------PRINT------------------------*/
+134        * prints data set sas.failure based on criteria;
+135        title 'sas.failure data set by cause for day and count variables.';
+136        proc print data=fails;
+137        	by cause;
+138        	var day count;
+139        run;
+
+NOTE: There were 70 observations read from the data set WORK.FAILS.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.04 seconds
+      cpu time            0.05 seconds
+      
+
+140        
+141        * prints data set employee_donations based on criteria;
+142        options missing = '0';
+143        title 'employee_donations data set w missing data=0, no obs, dollar8.2 format, labels, and Qtr sums';
+144        proc print data=employee_donate noobs label;
+145        	format Qtr1--Qtr4 dollar8.2;
+146        	label paid_by = 'Type of Payment';
+147        	var paid_by recipients Qtr1--Qtr4;
+148        	sum Qtr:;
+149        run;
+
+NOTE: There were 124 observations read from the data set WORK.EMPLOYEE_DONATE.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.08 seconds
+      cpu time            0.08 seconds
+      
+
+150        
+151        /* ------------------------FREQ------------------------*/
+4                                                          The SAS System                     Monday, September 11, 2023 10:51:26 AM
+
+152        * prints customer country distribution for customer_dim data set;
+153        title 'Customer country distribution for customer_dim data set';
+154        proc freq data=custo_dim;
+155        	tables customer_country;
+156        run;
+
+NOTE: There were 75 observations read from the data set WORK.CUSTO_DIM.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+157        
+158        * prints crosstabulation of customer country and age group for customer_dim data set;
+159        title 'Crosstabulation of customer country and age group for customer_dim data set';
+160        proc freq data=custo_dim;
+161        	tables customer_country*customer_age_group;
+162        run;
+
+NOTE: There were 75 observations read from the data set WORK.CUSTO_DIM.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.04 seconds
+      cpu time            0.04 seconds
+      
+
+163        
+164        * prints crosstabulation of customer type and group for customers over the age of 40 with percent and cumulative percent
+164      ! for customer_dim data set;
+165        title 'Crosstabulation of customer type and group for customers over the age of 40 with percent and cumulative percent
+165      ! values for customer_dim data set';
+166        proc freq data=custo_dim;
+167        	where customer_age > 40;
+168        	tables customer_type*customer_group / list;
+169        	tables customer_group*customer_type / list;
+170        run;
+
+NOTE: There were 36 observations read from the data set WORK.CUSTO_DIM.
+      WHERE customer_age>40;
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.02 seconds
+      
+
+171        
+172        * prints crosstabulation of treatment and response as well as sensitivity and specificity estimates for migraine data set
+172      ! ;
+173        title 'Crosstabulation of treatment and response as well as sensitivity and specificity estimates for migraine data set';
+174        proc freq data=mig;
+175        	tables treatment*response / senspec;
+176        run;
+
+NOTE: There were 60 observations read from the data set WORK.MIG.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.03 seconds
+      
+
+177        
+5                                                          The SAS System                     Monday, September 11, 2023 10:51:26 AM
+
+178        proc printto; run;
+

@@ -1,0 +1,143 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+71         
+72         /****************************************************************************
+73         *
+74         * Project : BIOS 511 Lab 12
+75         *
+76         * Program name : lab12_730460523.sas
+77         *
+78         * Author : Katie Chai
+79         *
+80         * Date created : 2023-10-09
+81         *
+82         * Purpose : This program is designed to apply the key points of the lecture:
+83         * 1) Generating new data sets based on exiting data sets
+84         * 2) Using numeric and character functions
+85         *
+86         * Revision History :
+87         *
+88         * Note: Standard header taken from :
+89         * https://www.phusewiki.org/wiki/index.php?title=Program_Header
+90         ****************************************************************************/
+91         
+92         %put %upcase(no)TE: Program being run by 730460523;
+NOTE: Program being run by 730460523
+93         options nofullstimer;
+94         
+95         /* ------------------------LIBNAME------------------------*/
+96         * assigns libref for class data;
+97         LIBNAME classDat "/home/u63543119/my_shared_file_links/u49231441/Data" access=readonly;
+NOTE: Libref CLASSDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/my_shared_file_links/u49231441/Data
+98         
+99         * assigns libref for my data;
+100        LIBNAME myDat "/home/u63543119/BIOS511/Data";
+NOTE: Libref MYDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/BIOS511/Data
+101        
+102        * create an pdf file that contains selected information below;
+103        ods pdf file='/home/u63543119/BIOS511/Output/lab12_730460523.pdf';
+NOTE: Writing ODS PDF output to DISK destination "/home/u63543119/BIOS511/Output/lab12_730460523.pdf", printer "PDF".
+104        
+105        /* ------------------------Question 1------------------------*/
+106        * Create a temporary version of the sashelp.us_data data set. Make the following changes;
+107        data new_us_data;
+108        	set sashelp.us_data;
+109        	pop_per_change = round(((population_1970-population_1960)/population_1970)*100, 0.01);
+110        	abs_difference = abs(pop_per_change-change_1970);
+2                                                          The SAS System                       Monday, October  9, 2023 10:43:58 AM
+
+111        	total_num_seat_changes = sum(seat_change_1910, seat_change_1920, seat_change_1930, seat_change_1940, seat_change_1950,
+111      ! seat_change_1960, seat_change_1970);
+112        	output;
+113        run;
+
+NOTE: Missing values were generated as a result of performing an operation on missing values.
+      Each place is given by: (Number of times) at (Line):(Column).
+      2 at 111:27   
+NOTE: There were 52 observations read from the data set SASHELP.US_DATA.
+NOTE: The data set WORK.NEW_US_DATA has 52 observations and 85 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.02 seconds
+      
+
+114        
+115        /* ------------------------Question 2------------------------*/
+116        * Sort the data set created in #1 by descending percent change;
+117        proc sort data=new_us_data;
+118        	by descending pop_per_change;
+119        run;
+
+NOTE: There were 52 observations read from the data set WORK.NEW_US_DATA.
+NOTE: The data set WORK.NEW_US_DATA has 52 observations and 85 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+120        
+121        /* ------------------------Question 3------------------------*/
+122        * Print the data set created in #2;
+123        title1 'Summary Data including name, division, population 1960 and 1970, change_1970, and 3 created variables
+123      ! (data=new_us_data)';
+124        proc print data=new_us_data (obs=15) noobs;
+125        	var statename division population_1960 population_1970 change_1970 pop_per_change abs_difference total_num_seat_changes;
+126        run;
+
+NOTE: There were 15 observations read from the data set WORK.NEW_US_DATA.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.03 seconds
+      cpu time            0.03 seconds
+      
+
+127        
+128        /* ------------------------Question 4------------------------*/
+129        * Create a temporary version of the budget data set in the course folder. Make the following changes;
+130        data new_budget;
+131        	set classDat.budget;
+132        	average_budget = mean(yr2016, yr2017, yr2018, yr2019, yr2020);
+133        	min_budget = min(yr2016, yr2017, yr2018, yr2019, yr2020);
+134        	max_budget = max(yr2016, yr2017, yr2018, yr2019, yr2020);
+135        	multiplier = 1.12;
+136        	output;
+137        run;
+
+NOTE: There were 12 observations read from the data set CLASSDAT.BUDGET.
+NOTE: The data set WORK.NEW_BUDGET has 12 observations and 12 variables.
+3                                                          The SAS System                       Monday, October  9, 2023 10:43:58 AM
+
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+138        
+139        /* ------------------------Question 5------------------------*/
+140        * Using PROC MEANS, summarize the data created in step #4;
+141        title1 'Summary Statistics including average, minimum, maximum, and multiplier (data=new_budget)';
+142        ods noproctitle; * supress the printing of the procedure name;
+143        proc means data=new_budget mean min max nonobs;
+144        	class department;
+145        	var average_budget min_budget max_budget multiplier;	
+146        run;
+
+NOTE: There were 12 observations read from the data set WORK.NEW_BUDGET.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.03 seconds
+      cpu time            0.03 seconds
+      
+
+147        
+148        /* ------------------------CLOSING------------------------*/
+149        ods pdf close;
+NOTE: ODS PDF printed 2 pages to /home/u63543119/BIOS511/Output/lab12_730460523.pdf.
+150        
+151        proc printto; run;
+

@@ -1,0 +1,218 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+71         
+72         /****************************************************************************
+73         *
+74         * Project : BIOS 511 Lab 15
+75         *
+76         * Program name : lab15_730460523.sas
+77         *
+78         * Author : Katie Chai
+79         *
+80         * Date created : 2023-10-23
+81         *
+82         * Purpose : This program is designed to apply the key points of the lecture:
+83         * 1) Conditionally executing statements and applying values
+84         *
+85         * Revision History :
+86         *
+87         * Note: Standard header taken from :
+88         * https://www.phusewiki.org/wiki/index.php?title=Program_Header
+89         ****************************************************************************/
+90         
+91         %put %upcase(no)TE: Program being run by 730460523;
+NOTE: Program being run by 730460523
+92         options nofullstimer;
+93         
+94         /* ------------------------LIBNAME------------------------*/
+95         * assigns libref for class data;
+96         LIBNAME classDat "/home/u63543119/my_shared_file_links/u49231441/Data" access=readonly;
+NOTE: Libref CLASSDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/my_shared_file_links/u49231441/Data
+97         
+98         * assigns libref for my data;
+99         LIBNAME myDat "/home/u63543119/BIOS511/Data";
+NOTE: Libref MYDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/BIOS511/Data
+100        
+101        * create an pdf file that contains selected information below;
+102        ods pdf file='/home/u63543119/BIOS511/Output/lab15_730460523.pdf';
+NOTE: Writing ODS PDF output to DISK destination "/home/u63543119/BIOS511/Output/lab15_730460523.pdf", printer "PDF".
+103        
+104        /* ------------------------Question 1------------------------*/
+105        * Create a temporary data set based on the depression data set in the course folder;
+106        data depression1;
+107        	set classDat.depression;
+108        	length category $10;
+109        	* setting category var based on case and health var;
+110        	if case = 0 then do;
+2                                                          The SAS System                       Monday, October 23, 2023 03:22:15 PM
+
+111        		if 1 <= health <= 2 then category = "Good";
+112        		else if health = 3 then category = "Acceptable";
+113        		else category = "Unknown";
+114        	end;
+115        	else if case = 1 then do;
+116        		if 1 <= health <= 3 then category = "Bad";
+117        		else if health = 4 then category = "Very Bad";
+118        		else category = "Unknown";
+119        	end;
+120        	label category = 'Case and Health Results';
+121        run;
+
+NOTE: There were 49 observations read from the data set CLASSDAT.DEPRESSION.
+NOTE: The data set WORK.DEPRESSION1 has 49 observations and 38 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+122        
+123        /* ------------------------Question 2------------------------*/
+124        * Use a PROC FREQ to check your results for the variable created in #1a;
+125        * You should not have any Unknown values;
+126        title1 'PROC FREQ (data=depression1)';
+127        title2 'Checking Results of Newly Created Case and Health Results Variable';
+128        proc freq data = depression1;
+129        	tables category;
+130        run;
+
+NOTE: There were 49 observations read from the data set WORK.DEPRESSION1.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.02 seconds
+      
+
+131        
+132        /* ------------------------Question 3------------------------*/
+133        * Create the exact same data set as you did in #1, with a new name;
+134        * Use the other conditioning method;
+135        data depression2;
+136        	set classDat.depression;
+137        	length category $10;
+138        	* setting category var based on case and health var;
+139        	select;
+140        		when(case = 0 and health = 1) category = "Good";
+141        		when(case = 0 and health = 2) category = "Good";
+142        		when(case = 0 and health = 3) category = "Acceptable";
+143        		when(case = 0 and health = .) category = "Unknown";
+144        		when(case = 1 and health = 1) category = "Bad";
+145        		when(case = 1 and health = 2) category = "Bad";
+146        		when(case = 1 and health = 3) category = "Bad";
+147        		when(case = 1 and health = 4) category = "Very Bad";
+148        		when(case = 1 and health = .) category = "Unknown";
+149        		otherwise putlog 'NOTE: Missing value for Health' category = "Unknown";
+150        	end;
+151        	label category = 'Case and Health Results';
+152        run;
+
+3                                                          The SAS System                       Monday, October 23, 2023 03:22:15 PM
+
+NOTE: There were 49 observations read from the data set CLASSDAT.DEPRESSION.
+NOTE: The data set WORK.DEPRESSION2 has 49 observations and 38 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+153        
+154        /* ------------------------Question 4------------------------*/
+155        * Use the following PROC COMPARE step to check that the data sets have all of the same values;
+156        title1 'PROC COMPARE (data=depression1, depression2)';
+157        title2 'Comparing Results of Data Sets Created Using If and Select';
+158        proc compare base=depression1 compare=depression2;
+159        run;
+
+NOTE: There were 49 observations read from the data set WORK.DEPRESSION1.
+NOTE: There were 49 observations read from the data set WORK.DEPRESSION2.
+NOTE: PROCEDURE COMPARE used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+160        
+161        /* ------------------------Question 5------------------------*/
+162        * Create a temporary version of the employee_donations data set in the course folder;
+163        data employee_donations1;
+164        	set classDat.employee_donations;
+165        	total_donations_year_sum = sum(Qtr1, Qtr2, Qtr3, Qtr4);
+166        	* fixing missing values for donation $;
+167        	if Qtr1 = . then Qtr1 = 0;
+168        	if Qtr2 = . then Qtr2 = 0;
+169        	if Qtr3 = . then Qtr3 = 0;
+170        	if Qtr4 = . then Qtr4 = 0;
+171        	* summing / adding in two ways;
+172        	total_donations_year_add = Qtr1 + Qtr2 + Qtr3 + Qtr4;
+173        	difference = total_donations_year_sum - total_donations_year_add;
+174        run;
+
+NOTE: There were 124 observations read from the data set CLASSDAT.EMPLOYEE_DONATIONS.
+NOTE: The data set WORK.EMPLOYEE_DONATIONS1 has 124 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+175        
+176        /* ------------------------Question 6------------------------*/
+177        * Use PROC MEANS to verify that all values of the difference variable from #5c are zero;
+178        * Request the MIN, MAX, MEAN, SUM, and NMISS statistics;
+179        title1 'PROC MEANS (data=employee_donations1)';
+180        title2 'Checking that the Difference Variable = 0';
+181        proc means data = employee_donations1 min max mean sum nmiss;
+182        	var difference;
+183        run;
+
+NOTE: There were 124 observations read from the data set WORK.EMPLOYEE_DONATIONS1.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.01 seconds
+4                                                          The SAS System                       Monday, October 23, 2023 03:22:15 PM
+
+      cpu time            0.02 seconds
+      
+
+184        
+185        /* ------------------------Question 7------------------------*/
+186        * Create a temporary version of the learn_modalities data set in the course folder;
+187        data learn_modalities1;
+188        	set classDat.learn_modalities;
+189        	* selecting only the date (not the time);
+190        	week_date = datepart(week);
+191        	* subsetting to dates before Jan 1, 2021;
+192        	if week_date < "01JAN2021"d;
+193        run;
+
+NOTE: There were 429865 observations read from the data set CLASSDAT.LEARN_MODALITIES.
+NOTE: The data set WORK.LEARN_MODALITIES1 has 184960 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.04 seconds
+      cpu time            0.04 seconds
+      
+
+194        
+195        /* ------------------------Question 8------------------------*/
+196        * Run a PROC FREQ on the data set created in #7;
+197        title1 'PROC FREQ (data=learn_modalities1)';
+198        title2 'Checking that the Difference Variable = 0';
+199        proc freq data = learn_modalities1;
+200        	tables learning_modality;
+201        run;
+
+NOTE: There were 184960 observations read from the data set WORK.LEARN_MODALITIES1.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.03 seconds
+      
+
+202        
+203        /* ------------------------CLOSING------------------------*/
+204        ods pdf close;
+NOTE: ODS PDF printed 4 pages to /home/u63543119/BIOS511/Output/lab15_730460523.pdf.
+205        
+206        proc printto; run;
+

@@ -1,0 +1,169 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              312.46k
+      OS Memory           24224.00k
+      Timestamp           10/11/2023 02:19:10 PM
+      Step Count                        189  Switch Count  0
+      Page Faults                       0
+      Page Reclaims                     27
+      Page Swaps                        0
+      Voluntary Context Switches        6
+      Involuntary Context Switches      0
+      Block Input Operations            0
+      Block Output Operations           0
+      
+
+71         
+72         /****************************************************************************
+73         *
+74         * Project : BIOS 511 Lab 13
+75         *
+76         * Program name : lab13_730460523.sas
+77         *
+78         * Author : Katie Chai
+79         *
+80         * Date created : 2023-10-11
+81         *
+82         * Purpose : This program is designed to apply the key points of the lecture:
+83         * 1) Using DATA step statements
+84         *
+85         * Revision History :
+86         *
+87         * Note: Standard header taken from :
+88         * https://www.phusewiki.org/wiki/index.php?title=Program_Header
+89         ****************************************************************************/
+90         
+91         %put %upcase(no)TE: Program being run by 730460523;
+NOTE: Program being run by 730460523
+92         options nofullstimer;
+93         
+94         /* ------------------------LIBNAME------------------------*/
+95         * assigns libref for class data;
+96         LIBNAME classDat "/home/u63543119/my_shared_file_links/u49231441/Data" access=readonly;
+NOTE: Libref CLASSDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/my_shared_file_links/u49231441/Data
+97         
+98         * assigns libref for my data;
+99         LIBNAME myDat "/home/u63543119/BIOS511/Data";
+NOTE: Libref MYDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/BIOS511/Data
+2                                                          The SAS System                    Wednesday, October 11, 2023 10:19:10 AM
+
+100        
+101        * create an pdf file that contains selected information below;
+102        ods pdf file='/home/u63543119/BIOS511/Output/lab13_730460523.pdf';
+NOTE: Writing ODS PDF output to DISK destination "/home/u63543119/BIOS511/Output/lab13_730460523.pdf", printer "PDF".
+103        
+104        /* ------------------------Question 1------------------------*/
+105        * Create a temporary version of the lb data set in the course folder;
+106        data new_lb;
+107        	set classDat.lb;
+108        	where visit = 'Week 32';
+109        	lbcat = propcase(lbcat);
+110        	length lbcat_test $100;
+111        	lbcat_test = catx(': ', lbcat, lbtest);
+112        	keep usubjid visit lbstresn lbcat_test;
+113        run;
+
+NOTE: There were 1806 observations read from the data set CLASSDAT.LB.
+      WHERE visit='Week 32';
+NOTE: The data set WORK.NEW_LB has 1806 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+114        
+115        /* ------------------------Question 2------------------------*/
+116        * Run a PROC CONTENTS step on the data set created in #1;
+117        ods exclude enginehost; * exclude engine/host info;
+118        title1 'Summary data for updated lb data set';
+119        title2 'PROC CONTENTS (data=new_lb)';
+120        proc contents data=new_lb;
+121        run;
+
+NOTE: PROCEDURE CONTENTS used (Total process time):
+      real time           0.03 seconds
+      cpu time            0.02 seconds
+      
+
+122        ods exclude none;
+123        
+124        /* ------------------------Question 3------------------------*/
+125        * Create a temporary version of the sashelp.snacks data set;
+126        data new_snacks;
+127        	set sashelp.snacks;
+128        	if product = 'Cheese puffs';
+129        	salePrice = (0.95 * price);
+130        	label salePrice = '95 % of Price Variable';
+131        	drop price;
+132        run;
+
+NOTE: There were 35770 observations read from the data set SASHELP.SNACKS.
+NOTE: The data set WORK.NEW_SNACKS has 1022 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.02 seconds
+      
+
+133        
+3                                                          The SAS System                    Wednesday, October 11, 2023 10:19:11 AM
+
+134        /* ------------------------Question 4------------------------*/
+135        * Run a PROC CONTENTS step on the data set created in #3;
+136        ods exclude enginehost; * exclude engine/host info;
+137        title1 'Summary data for updated snacks data set';
+138        title2 'PROC CONTENTS (data=new_snacks)';
+139        proc contents data=new_snacks;
+140        run;
+
+NOTE: PROCEDURE CONTENTS used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.02 seconds
+      
+
+141        ods exclude none;
+142        
+143        /* ------------------------Question 5------------------------*/
+144        * Create a temporary version of the employee_donations data set in the course data set;
+145        data new_employee_donations;
+146        	set classDat.employee_donations;
+147        	yearTotal = sum(Qtr1, Qtr2, Qtr3, Qtr4);
+148        	label yearTotal = 'Yearly Total Donation Amount';
+149        run;
+
+NOTE: There were 124 observations read from the data set CLASSDAT.EMPLOYEE_DONATIONS.
+NOTE: The data set WORK.NEW_EMPLOYEE_DONATIONS has 124 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+150        
+151        /* ------------------------Question 6------------------------*/
+152        * Using PROC MEANS, summarize the data created in step #5;
+153        ods noproctitle; * supress printing of proc name;
+154        
+155        title1 'Summary statistics for updated employee donations data set';
+156        title2 'PROC MEANS (data=new_employee_donations)';
+157        proc means data=new_employee_donations n mean nonobs;
+158        	class paid_by;
+159        run;
+
+NOTE: There were 124 observations read from the data set WORK.NEW_EMPLOYEE_DONATIONS.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.03 seconds
+      cpu time            0.04 seconds
+      
+
+160        
+161        /* ------------------------CLOSING------------------------*/
+162        ods pdf close;
+NOTE: ODS PDF printed 3 pages to /home/u63543119/BIOS511/Output/lab13_730460523.pdf.
+163        
+164        proc printto; run;
+

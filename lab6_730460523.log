@@ -1,0 +1,242 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              369.96k
+      OS Memory           27808.00k
+      Timestamp           09/13/2023 03:29:00 PM
+      Step Count                        404  Switch Count  0
+      Page Faults                       1
+      Page Reclaims                     21
+      Page Swaps                        0
+      Voluntary Context Switches        7
+      Involuntary Context Switches      0
+      Block Input Operations            96
+      Block Output Operations           0
+      
+
+70         
+71         /****************************************************************************
+72         *
+73         * Project : BIOS 511 Lab 6
+74         *
+75         * Program name : lab6_730460523.sas
+76         *
+77         * Author : Katie Chai
+78         *
+79         * Date created : 2023-09-13
+80         *
+81         * Purpose : This program is designed to apply the key points of the lecture:
+82         * 1) Using PROC MEANS to calculate simple statistics on numeric variables
+83         * 2) Using PROC UNIVARIATE to calculate statistics and generate plots
+84         *
+85         * Revision History :
+86         *
+87         * Note: Standard header taken from :
+88         * https://www.phusewiki.org/wiki/index.php?title=Program_Header
+89         ****************************************************************************/
+90         
+91         %put %upcase(no)TE: Program being run by 730460523;
+NOTE: Program being run by 730460523
+92         options nofullstimer;
+93         
+94         /* ------------------------LIBNAME------------------------*/
+95         * assigns libref for class data;
+96         LIBNAME classDat "/home/u63543119/my_shared_file_links/u49231441/Data" access=readonly;
+NOTE: Libref CLASSDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/my_shared_file_links/u49231441/Data
+97         
+98         * assigns libref for my data;
+99         LIBNAME myDat "/home/u63543119/BIOS511/Data";
+NOTE: Libref MYDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/BIOS511/Data
+2                                                          The SAS System                  Wednesday, September 13, 2023 11:29:00 AM
+
+100        
+101        /* ------------------------DATA------------------------*/
+102        * creates temp data set from sashelp.pricedata;
+103        data priceData;
+104        	set sashelp.pricedata;
+105        run;
+
+NOTE: There were 1020 observations read from the data set SASHELP.PRICEDATA.
+NOTE: The data set WORK.PRICEDATA has 1020 observations and 28 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+106        
+107        * creates temp data set from order_fact;
+108        data orderFact;
+109        	set classDat.order_fact;
+110        run;
+
+NOTE: There were 617 observations read from the data set CLASSDAT.ORDER_FACT.
+NOTE: The data set WORK.ORDERFACT has 617 observations and 12 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+111        
+112        * creates temp data set from sas.orsales;
+113        data orSales;
+114        	set sashelp.orsales;
+115        run;
+
+NOTE: There were 912 observations read from the data set SASHELP.ORSALES.
+NOTE: The data set WORK.ORSALES has 912 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+116        
+117        * creates temp data set from budget;
+118        data budge;
+119        	set classDat.budget;
+120        run;
+
+NOTE: There were 12 observations read from the data set CLASSDAT.BUDGET.
+NOTE: The data set WORK.BUDGE has 12 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+121        
+122        /* ------------------------MEANS------------------------*/
+123        * Question 1: Run a PROC MEANS step on the sashelp.pricedata data set;
+124        title1 'PROC MEANS on Price data set';
+125        title2 '(not including n, mean, min, or max)';
+3                                                          The SAS System                  Wednesday, September 13, 2023 11:29:00 AM
+
+126        proc means data=priceData median mode kurtosis std Q1 Q3;
+127        run;
+
+NOTE: There were 1020 observations read from the data set WORK.PRICEDATA.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.12 seconds
+      cpu time            0.12 seconds
+      
+
+128        
+129        * Question 2: Run a PROC MEANS step on the order_fact data set in the course data folder;
+130        title1 'PROC MEANS on Order Fact data set';
+131        title2 '(using CLASS statement and calculating count, sum, and mean for quality and cost price per unit variables)';
+132        proc means data=orderFact n sum mean;
+133        	class order_type;
+134        	var quantity costprice_per_unit;
+135        run;
+
+NOTE: There were 617 observations read from the data set WORK.ORDERFACT.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.02 seconds
+      
+
+136        
+137        * Question 3: Run a PROC MEANS on the sashelp.orsales data set;
+138        proc means data=orSales noprint nway;
+139        	where year=2000;
+140        	class product_line product_category;
+141        	var quantity profit total_retail_price;
+142        	output sum=/autoname;
+143        run;
+
+NOTE: There were 228 observations read from the data set WORK.ORSALES.
+      WHERE year=2000;
+NOTE: The data set WORK.DATA31 has 12 observations and 7 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+144        
+145        * Question 4: Run a PROC PRINT on the data set generated in #3;
+146        title1 'PROC PRINT on Or Sales data set';
+147        title2 '(limited to highest_TYPE_value, subset to year 2000 for product line, category, and profit)';
+148        proc print data=data1 noobs;
+149        	where product_category='Golf' or product_category='Swim Sports';
+150        	format profit_sum dollar12.2;
+151        	var product_line product_category profit_sum;
+152        run;
+
+NOTE: There were 2 observations read from the data set WORK.DATA1.
+      WHERE product_category in ('Golf', 'Swim Sports');
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+4                                                          The SAS System                  Wednesday, September 13, 2023 11:29:00 AM
+
+153        
+154        * Question 5: Modify your code from #3;
+155        proc means data=orSales noprint nway;
+156        	where year=2000;
+157        	class product_line product_category;
+158        	var quantity profit total_retail_price;
+159        	output out=sumMeanData sum(profit total_retail_price)=Profit_Sum_Total Retail_Price_Sum mean(profit
+159      ! total_retail_price)=Profit_Mean Total_Retail_Price_Mean;
+160        run;
+
+NOTE: There were 228 observations read from the data set WORK.ORSALES.
+      WHERE year=2000;
+NOTE: The data set WORK.SUMMEANDATA has 12 observations and 8 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+161        
+162        /* ------------------------UNIVARIATE------------------------*/
+163        * Question 6: Run a PROC UNIVARIATE on the budget data set in the course data folder;
+164        proc sort data=budge out=budge;
+165        	by department;
+166        run;
+
+NOTE: There were 12 observations read from the data set WORK.BUDGE.
+NOTE: The data set WORK.BUDGE has 12 observations and 8 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+167        
+168        title1 'PROC UNIVARIATE on Budget data set';
+169        title2 '(by department for year 2017 with confidence limits information)';
+170        proc univariate data=budge cibasic;
+171        	by department;
+172        	var yr2017;
+173        run;
+
+NOTE: PROCEDURE UNIVARIATE used (Total process time):
+      real time           0.20 seconds
+      cpu time            0.19 seconds
+      
+
+174        
+175        * Question 7: Create a histogram with PROC UNIVARIATE on the budget data set in the course data
+176        folder;
+177        title1 'PROC UNIVARIATE on Budget data set';
+178        title2 '(histogram with department as classification var and year 2016 as analysis var and insets)';
+179        proc univariate data=budge noprint;
+180        	class department;
+181        	histogram yr2016;
+182        	inset mean std / position=ne;
+183        run;
+
+NOTE: PROCEDURE UNIVARIATE used (Total process time):
+      real time           0.25 seconds
+5                                                          The SAS System                  Wednesday, September 13, 2023 11:29:01 AM
+
+      cpu time            0.09 seconds
+      
+
+184        
+185        proc printto; run;
+

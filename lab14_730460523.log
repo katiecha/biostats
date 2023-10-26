@@ -1,0 +1,353 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+71         
+72         /****************************************************************************
+73         *
+74         * Project : BIOS 511 Lab 14
+75         *
+76         * Program name : lab14_730460523.sas
+77         *
+78         * Author : Katie Chai
+79         *
+80         * Date created : 2023-10-16
+81         *
+82         * Purpose : This program is designed to apply the key points of the lecture:
+83         * 1) Combining data sets with a SET statement
+84         * 2) Combining data sets with a MERGE statement
+85         *
+86         * Revision History :
+87         *
+88         * Note: Standard header taken from :
+89         * https://www.phusewiki.org/wiki/index.php?title=Program_Header
+90         ****************************************************************************/
+91         
+92         %put %upcase(no)TE: Program being run by 730460523;
+NOTE: Program being run by 730460523
+93         options nofullstimer;
+94         
+95         /* ------------------------LIBNAME------------------------*/
+96         * assigns libref for class data;
+97         LIBNAME classDat "/home/u63543119/my_shared_file_links/u49231441/Data" access=readonly;
+NOTE: Libref CLASSDAT refers to the same physical library as DATA511.
+NOTE: Libref CLASSDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/my_shared_file_links/u49231441/Data
+98         
+99         * assigns libref for my data;
+100        LIBNAME myDat "/home/u63543119/BIOS511/Data";
+NOTE: Libref MYDAT refers to the same physical library as MYDATA.
+NOTE: Libref MYDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/BIOS511/Data
+101        
+102        * create an pdf file that contains selected information below;
+103        ods pdf file='/home/u63543119/BIOS511/Output/lab14_730460523.pdf';
+NOTE: Writing ODS PDF output to DISK destination "/home/u63543119/BIOS511/Output/lab14_730460523.pdf", printer "PDF".
+104        
+105        /* ------------------------Question 1------------------------*/
+106        * Create a permanent data set named aedm;
+107        
+108        * create temp data set dm;
+2                                                          The SAS System                      Tuesday, October 17, 2023 01:08:29 PM
+
+109        data dm;
+110        	set classDat.dm;
+111        run;
+
+NOTE: There were 602 observations read from the data set CLASSDAT.DM.
+NOTE: The data set WORK.DM has 602 observations and 15 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+112        
+113        * create temp data set ae;
+114        data ae;
+115        	set classDat.ae;
+116        run;
+
+NOTE: There were 1177 observations read from the data set CLASSDAT.AE.
+NOTE: The data set WORK.AE has 1177 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+117        
+118        * sort temp data sets;
+119        proc sort data=dm; by usubjid;
+
+NOTE: There were 602 observations read from the data set WORK.DM.
+NOTE: The data set WORK.DM has 602 observations and 15 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+120        proc sort data=ae; by usubjid;
+121        run;
+
+NOTE: There were 1177 observations read from the data set WORK.AE.
+NOTE: The data set WORK.AE has 1177 observations and 10 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+122        
+123        * merge temp data sets dm and ae into perm data set aedm;
+124        data myDat.aedm;
+125        	merge dm ae;
+126        	by usubjid;
+127        run;
+
+NOTE: There were 602 observations read from the data set WORK.DM.
+NOTE: There were 1177 observations read from the data set WORK.AE.
+NOTE: The data set MYDAT.AEDM has 1317 observations and 23 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.00 seconds
+3                                                          The SAS System                      Tuesday, October 17, 2023 01:08:29 PM
+
+      
+
+128        
+129        /* ------------------------Question 2------------------------*/
+130        * Run a PROC CONTENTS step on the data set created in #1;
+131        title1 'PROC CONTENTS on merged dm ae data sorted by subject id (data=myDat.aedm)';
+132        ods exclude enginehost variables; * exclude engine/host information;
+133        proc contents data=myDat.aedm;
+134        run;
+
+NOTE: PROCEDURE CONTENTS used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.03 seconds
+      
+
+135        
+136        /* ------------------------Question 3------------------------*/
+137        * Create a temporary data set;
+138        data subset_aedm;
+139        	merge dm(in=ind) ae(in=int);
+140        	if ind=1 and int=0;
+141        	by usubjid;
+142        	keep usubjid sex age;
+143        run;
+
+NOTE: There were 602 observations read from the data set WORK.DM.
+NOTE: There were 1177 observations read from the data set WORK.AE.
+NOTE: The data set WORK.SUBSET_AEDM has 140 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+144        
+145        /* ------------------------Question 4------------------------*/
+146        * Print the first ten participants of the data set created in #3;
+147        title1 'PROC PRINT on subset dm ae data sorted by subject id (data=subset_aedm)';
+148        proc print data=subset_aedm (obs=10);
+149        run;
+
+NOTE: There were 10 observations read from the data set WORK.SUBSET_AEDM.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+150        
+151        /* ------------------------Question 5------------------------*/
+152        * Create a permanent data set named aedm2;
+153        data myDat.aedm2;
+154        	merge dm(in=ind) ae(in=int);
+155        	if ind=1 and int=1;
+156        	by usubjid;
+157        run;
+
+NOTE: There were 602 observations read from the data set WORK.DM.
+NOTE: There were 1177 observations read from the data set WORK.AE.
+NOTE: The data set MYDAT.AEDM2 has 1177 observations and 23 variables.
+4                                                          The SAS System                      Tuesday, October 17, 2023 01:08:29 PM
+
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.00 seconds
+      
+
+158        
+159        /* ------------------------Question 6------------------------*/
+160        * Using the data set from #5, create a panel graph (PROC SGPANEL) of vertical bars;
+161        title1 'PROC SGPANEL on subset dm ae data sorted by subject id (data=myDat.aedm2)';
+162        title2 'Panel graph of vertical bars';
+163        proc sgpanel data=myDat.aedm2;
+164        	panelby race arm / novarname columns=4 spacing=20;
+165        	vbar aesev / group=sex;
+166        run;
+
+NOTE: PROCEDURE SGPANEL used (Total process time):
+      real time           0.36 seconds
+      cpu time            0.11 seconds
+      
+WARNING: The font <sans-serif> is not available. Albany AMT will be used.
+NOTE: There were 1177 observations read from the data set MYDAT.AEDM2.
+
+167        
+168        /* ------------------------Question 7------------------------*/
+169        * The objective of this task is to create a temporary data set that contains the variables USUBJID, VISITNUM, VISIT,
+169      ! DIABP, and SYSBP;
+170        
+171        * create temp data set vs;
+172        data vs;
+173        	set classDat.vs;
+174        run;
+
+NOTE: There were 15050 observations read from the data set CLASSDAT.VS.
+NOTE: The data set WORK.VS has 15050 observations and 13 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+175        
+176        * create temp data set vs with obs for diastolic;
+177        data vs1;
+178        	set classDat.vs;
+179        	where vstestcd = 'DIABP';
+180        	rename vsstresn = DIABP;
+181        run;
+
+NOTE: There were 3612 observations read from the data set CLASSDAT.VS.
+      WHERE vstestcd='DIABP';
+NOTE: The data set WORK.VS1 has 3612 observations and 13 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+182        
+183        * create temp data set vs with obs for systolic;
+184        data vs2;
+5                                                          The SAS System                      Tuesday, October 17, 2023 01:08:29 PM
+
+185        	set classDat.vs;
+186        	where vstestcd = 'SYSBP';
+187        	rename vsstresn = SYSBP;
+188        run;
+
+NOTE: There were 3612 observations read from the data set CLASSDAT.VS.
+      WHERE vstestcd='SYSBP';
+NOTE: The data set WORK.VS2 has 3612 observations and 13 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+189        
+190        proc sort data=vs1; by usubjid visitnum visit;
+
+NOTE: There were 3612 observations read from the data set WORK.VS1.
+NOTE: The data set WORK.VS1 has 3612 observations and 13 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+191        proc sort data=vs2; by usubjid visitnum visit;
+192        run;
+
+NOTE: There were 3612 observations read from the data set WORK.VS2.
+NOTE: The data set WORK.VS2 has 3612 observations and 13 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+193        
+194        data updated_vs1;
+195        	merge vs1 vs2;
+196        	by usubjid visitnum visit;
+197        	keep usubjid visitnum visit diabp sysbp;
+198        run;
+
+NOTE: There were 3612 observations read from the data set WORK.VS1.
+NOTE: There were 3612 observations read from the data set WORK.VS2.
+NOTE: The data set WORK.UPDATED_VS1 has 3612 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+199        
+200        /* ------------------------Question 8------------------------*/
+201        * Print the observations for subject ECHO-012-019 in the data set created in #6b;
+202        title1 'PROC PRINT on merged vs data set (data=updated_vs1)';
+203        title2 'Observation for subject ECHO-012-019';
+204        proc print data=updated_vs1;
+205        	where usubjid = 'ECHO-012-019';
+206        run;
+
+NOTE: There were 6 observations read from the data set WORK.UPDATED_VS1.
+6                                                          The SAS System                      Tuesday, October 17, 2023 01:08:29 PM
+
+      WHERE usubjid='ECHO-012-019';
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+207        
+208        /* ------------------------Question 9------------------------*/
+209        * The goal of this task is to create the same data set as #7b using one DATA step;
+210        proc sort data=vs out=sorted_vs;
+211        	by usubjid visitnum visit;
+212        run;
+
+NOTE: There were 15050 observations read from the data set WORK.VS.
+NOTE: The data set WORK.SORTED_VS has 15050 observations and 13 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+213        
+214        data updated_vs2;
+215        	merge sorted_vs (where=(vstestcd='DIABP') rename=(vsstresn=DIABP))
+216        		sorted_vs (where=(vstestcd='SYSBP') rename=(vsstresn=SYSBP));
+217        	by usubjid visitnum visit;
+218        	keep usubjid visitnum visit diabp sysbp;
+219        run;
+
+NOTE: There were 3612 observations read from the data set WORK.SORTED_VS.
+      WHERE vstestcd='DIABP';
+NOTE: There were 3612 observations read from the data set WORK.SORTED_VS.
+      WHERE vstestcd='SYSBP';
+NOTE: The data set WORK.UPDATED_VS2 has 3612 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+220        
+221        /* ------------------------Question 10------------------------*/
+222        * Run a PROC CONTENTS step on the data set created in #9a;
+223        title1 'PROC CONTENTS on merged vs data set (data=updated_vs2)';
+224        ods exclude enginehost; * exclude engine/host information;
+225        proc contents data=updated_vs2;
+226        run;
+
+NOTE: PROCEDURE CONTENTS used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.02 seconds
+      
+
+227        
+228        /* ------------------------CLOSING------------------------*/
+229        ods pdf close;
+NOTE: ODS PDF printed 5 pages to /home/u63543119/BIOS511/Output/lab14_730460523.pdf.
+230        
+231        proc printto; run;
+

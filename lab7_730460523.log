@@ -1,0 +1,218 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+70         
+71         /****************************************************************************
+72         *
+73         * Project : BIOS 511 Lab 7
+74         *
+75         * Program name : lab7_730460523.sas
+76         *
+77         * Author : Katie Chai
+78         *
+79         * Date created : 2023-09-18
+80         *
+81         * Purpose : This program is designed to apply the key points of the lecture:
+82         * 1) Generating reports with PROC REPORT
+83         *
+84         * Revision History :
+85         *
+86         * Note: Standard header taken from :
+87         * https://www.phusewiki.org/wiki/index.php?title=Program_Header
+88         ****************************************************************************/
+89         
+90         %put %upcase(no)TE: Program being run by 730460523;
+NOTE: Program being run by 730460523
+91         options nofullstimer;
+92         
+93         /* ------------------------LIBNAME------------------------*/
+94         * assigns libref for class data;
+95         LIBNAME classDat "/home/u63543119/my_shared_file_links/u49231441/Data" access=readonly;
+NOTE: Libref CLASSDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/my_shared_file_links/u49231441/Data
+96         
+97         * assigns libref for my data;
+98         LIBNAME myDat "/home/u63543119/BIOS511/Data";
+NOTE: Libref MYDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/BIOS511/Data
+99         
+100        /* ------------------------Question 1------------------------*/
+101        * create temp data set from learn_modalities;
+102        data learnModalities;
+103        	set classDat.learn_modalities;
+104        run;
+
+NOTE: There were 429865 observations read from the data set CLASSDAT.LEARN_MODALITIES.
+NOTE: The data set WORK.LEARNMODALITIES has 429865 observations and 9 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.05 seconds
+      cpu time            0.06 seconds
+      
+2                                                          The SAS System                     Monday, September 18, 2023 10:35:16 AM
+
+
+105        
+106        * proc report with specific conditions (where, col);
+107        title1 'PROC REPORT on Learn Modalities data set';
+108        title2 'displays only the first 25 observations,';
+109        title3 'subset to obs from South Dakota,';
+110        title4 'with cols for district name, learning modality, and num of student,';
+111        title5 'and spanning header';
+112        proc report data=learnModalities (obs=25);
+113        	where state='SD';	
+114        	column district_name ('Learning and Student Information' learning_modality student_count);
+115        run;
+
+NOTE: There were 25 observations read from the data set WORK.LEARNMODALITIES.
+      WHERE state='SD';
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.02 seconds
+      
+
+116        
+117        /* ------------------------Question 2------------------------*/
+118        * create temp data set from shoes;
+119        data shoes;
+120        	set sashelp.shoes;
+121        run;
+
+NOTE: There were 395 observations read from the data set SASHELP.SHOES.
+NOTE: The data set WORK.SHOES has 395 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+122        
+123        * proc report with specific conditions (col, define...group/max/min);
+124        title1 'PROC REPORT on Shoes data set';
+125        title2 'with cols for region, product, *returns, and inventory,';
+126        title3 'grouping region and product,';
+127        title4 'with max stat for returns,';
+128        title5 'and min stat for inventory';
+129        proc report data=shoes;	
+130        	column region product returns inventory;
+131        	define region / group;
+132        	define product / group;
+133        	define returns / 'Max Returns' max;
+134        	define inventory / 'Min Inventory' min;
+135        run;
+
+NOTE: There were 395 observations read from the data set WORK.SHOES.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.05 seconds
+      cpu time            0.05 seconds
+      
+
+136        
+137        
+138        /* ------------------------Question 3------------------------*/
+3                                                          The SAS System                     Monday, September 18, 2023 10:35:16 AM
+
+139        * create temp data set from budget;
+140        data budget;
+141        	set classDat.budget;
+142        run;
+
+NOTE: There were 12 observations read from the data set CLASSDAT.BUDGET.
+NOTE: The data set WORK.BUDGET has 12 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+143        
+144        * proc report with specific conditions (col, define...across);
+145        title1 'PROC REPORT on Budget data set';
+146        title2 'including department and years 2017-2019,';
+147        title3 'using department vars as headers';
+148        proc report data=budget;
+149        	column department, (yr2017 yr2018 yr2019);
+150        	define department / '' across;
+151        run;
+
+NOTE: There were 12 observations read from the data set WORK.BUDGET.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+152        
+153        /* ------------------------Question 4------------------------*/
+154        * create temp data set from employee_donations;
+155        data employeeDonations;
+156        	set classDat.employee_donations;
+157        run;
+
+NOTE: There were 124 observations read from the data set CLASSDAT.EMPLOYEE_DONATIONS.
+NOTE: The data set WORK.EMPLOYEEDONATIONS has 124 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+158        
+159        * proc report with specific conditions (col, define...group/format/style);
+160        title1 'PROC REPORT on Employee Donations data set';
+161        title2 'cols for paid by, quarter 1, quarter 2, quarter 3, and quarter 4,';
+162        title3 'with dollar8. format for quarter vars';
+163        title4 'and light green background for quarter 3 column';
+164        proc report data=employeeDonations;
+165        	column paid_by qtr1 qtr2 qtr3 qtr4;
+166        	define paid_by / group;
+167        	define qtr: / format=dollar8.;
+168        	define qtr3 / style(column)=[background=lightgreen];
+169        run;
+
+NOTE: There were 124 observations read from the data set WORK.EMPLOYEEDONATIONS.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.01 seconds
+4                                                          The SAS System                     Monday, September 18, 2023 10:35:16 AM
+
+      cpu time            0.02 seconds
+      
+
+170        
+171        /* ------------------------Question 5------------------------*/
+172        * create temp data set from cars;
+173        data cars;
+174        	set sashelp.cars;
+175        run;
+
+NOTE: There were 428 observations read from the data set SASHELP.CARS.
+NOTE: The data set WORK.CARS has 428 observations and 15 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+176        
+177        * proc report with specific conditions (col, define...group/across);
+178        title1 'PROC REPORT on Cars data set';
+179        title2 'using origin as a grouping var,';
+180        title3 'using type as col headers,';
+181        title4 'requesting n stat under type,';
+182        title5 'supressing label printing for all three report items,';
+183        title6 'and no dots for missing values';
+184        options missing = '0';
+185        proc report data=cars;
+186        	column origin type, n;
+187        	define origin / '' group;
+188        	define type / '' across;
+189        	define n / '';
+190        run;
+
+NOTE: There were 428 observations read from the data set WORK.CARS.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+191        
+192        proc printto; run;
+

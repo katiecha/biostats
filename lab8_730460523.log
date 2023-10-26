@@ -1,0 +1,259 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              371.18k
+      OS Memory           28576.00k
+      Timestamp           09/20/2023 02:52:26 PM
+      Step Count                        618  Switch Count  0
+      Page Faults                       0
+      Page Reclaims                     22
+      Page Swaps                        0
+      Voluntary Context Switches        5
+      Involuntary Context Switches      0
+      Block Input Operations            0
+      Block Output Operations           0
+      
+
+71         
+72         /****************************************************************************
+73         *
+74         * Project : BIOS 511 Lab 8
+75         *
+76         * Program name : lab8_730460523.sas
+77         *
+78         * Author : Katie Chai
+79         *
+80         * Date created : 2023-09-20
+81         *
+82         * Purpose : This program is designed to apply the key points of the lecture:
+83         * 1) Using ODS SELECT and ODS EXCLUDE statements to limit printed results
+84         * 2) Creating data sets with the ODS OUTPUT statement
+85         * 3) Applying style changes through the STYLE=option
+86         *
+87         * Revision History :
+88         *
+89         * Note: Standard header taken from :
+90         * https://www.phusewiki.org/wiki/index.php?title=Program_Header
+91         ****************************************************************************/
+92         
+93         %put %upcase(no)TE: Program being run by 730460523;
+NOTE: Program being run by 730460523
+94         options nofullstimer;
+95         
+96         /* ------------------------LIBNAME------------------------*/
+97         * assigns libref for class data;
+98         LIBNAME classDat "/home/u63543119/my_shared_file_links/u49231441/Data" access=readonly;
+NOTE: Libref CLASSDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/my_shared_file_links/u49231441/Data
+99         
+100        * assigns libref for my data;
+101        LIBNAME myDat "/home/u63543119/BIOS511/Data";
+NOTE: Libref MYDAT was successfully assigned as follows: 
+2                                                          The SAS System                  Wednesday, September 20, 2023 10:52:26 AM
+
+      Engine:        V9 
+      Physical Name: /home/u63543119/BIOS511/Data
+102        
+103        /* ------------------------Question 1.a------------------------*/
+104        * create an rtf files that contains...;
+105        ods rtf file='/home/u63543119/BIOS511/Output/lab8_730460523.rtf';
+NOTE: Writing RTF Body file: /home/u63543119/BIOS511/Output/lab8_730460523.rtf
+106        
+107        * create temp data set from living_data;
+108        data livingData;
+109        	set classDat.living_data;
+110        run;
+
+NOTE: There were 40 observations read from the data set CLASSDAT.LIVING_DATA.
+NOTE: The data set WORK.LIVINGDATA has 40 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+111        
+112        * ods trace on; *(used to find object name in the past);
+113        ods noproctitle; * supress printing of the proc title;
+114        ods select FishersExact; * used to select only Fisher's test;
+115        * run proc freq on livingData;
+116        title1 'Fishers Exact Test for the combination of treatment and status (data=living_data)';
+117        proc freq data=livingData;
+118        	tables treatment*status / fisher;
+119        run;
+
+NOTE: There were 40 observations read from the data set WORK.LIVINGDATA.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.02 seconds
+      
+
+120        * ods trace off; *(used to find object name in the past);
+121        
+122        /* ------------------------Question 1.b------------------------*/
+123        * create temp data set from us_data;
+124        data usData;
+125        	set sashelp.us_data;
+126        run;
+
+NOTE: There were 52 observations read from the data set SASHELP.US_DATA.
+NOTE: The data set WORK.USDATA has 52 observations and 82 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+127        
+128        proc sort data=usData;
+129        	by region;
+130        run;
+
+NOTE: There were 52 observations read from the data set WORK.USDATA.
+NOTE: The data set WORK.USDATA has 52 observations and 82 variables.
+3                                                          The SAS System                  Wednesday, September 20, 2023 10:52:27 AM
+
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+131        
+132        ods rtf startpage=bygroup;
+133        
+134        * run a proc print on (sorted) usData;
+135        title1 'US Data sorted by region (data=us_data)';
+136        title2 '(including division, state name, and ranks from 1990, 2000, 2010)';
+137        proc print data=usData;
+138        	by region;
+139        	var division statename rank_1990 rank_2000;
+140        	var rank_2010 / style(data)={background=lightblue};
+141        run;
+
+NOTE: There were 52 observations read from the data set WORK.USDATA.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.06 seconds
+      cpu time            0.06 seconds
+      
+
+142        
+143        ods rtf close;
+144        
+145        /* ------------------------Question 2.a------------------------*/
+146        * create a pdf file that contains;
+147        ods pdf file='/home/u63543119/BIOS511/Output/lab8_730460523.pdf' style=sapphire; * add style template to entire document
+NOTE: Writing ODS PDF output to DISK destination "/home/u63543119/BIOS511/Output/lab8_730460523.pdf", printer "PDF".
+148        
+149        /* ------------------------Question 2.b------------------------*/
+150        * create temp data set from drivers;
+151        data drivers;
+152        	set classDat.drivers;
+153        run;
+
+NOTE: There were 57834 observations read from the data set CLASSDAT.DRIVERS.
+NOTE: The data set WORK.DRIVERS has 57834 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+154        
+155        * ods trace on; *(used to find object name in the past);
+156        ods exclude all; * suppress printing of the results;
+157        ods output TestsForLocation=locationTests;
+158        * run a proc univariate on drivers;
+159        title1 'Proc Univariate with drivers as analysis variable (data=drivers)';
+160        proc univariate data=drivers;
+161        	var drivers;
+162        run;
+
+NOTE: The data set WORK.LOCATIONTESTS has 3 observations and 7 variables.
+NOTE: PROCEDURE UNIVARIATE used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.02 seconds
+4                                                          The SAS System                  Wednesday, September 20, 2023 10:52:27 AM
+
+      
+
+163        * ods trace off; *(used to find object name in the past);
+164        
+165        /* ------------------------Question 2.c------------------------*/
+166        ods select all; * turn printing of output back on;
+167        
+168        /* ------------------------Question 2.d------------------------*/
+169        title1 'Tests for Location (data=locationTests)';
+170        proc print data=locationTests;
+171        run;
+
+NOTE: There were 3 observations read from the data set WORK.LOCATIONTESTS.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+172        
+173        /* ------------------------Question 2.e------------------------*/
+174        * create temp data set from drivers;
+175        data shoes;
+176        	set sashelp.shoes;
+177        run;
+
+NOTE: There were 395 observations read from the data set SASHELP.SHOES.
+NOTE: The data set WORK.SHOES has 395 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+178        
+179        * ods trace on; *(used to find object name in the past);
+180        * run a proc means on shoes;
+181        title1 'Proc Means with stores as analysis variable (data=shoes)';
+182        ods output Summary=summary_ods;
+183        proc means data=shoes;
+184        	var stores;
+185        	output out=summary_output;
+186        run;
+
+NOTE: The data set WORK.SUMMARY_ODS has 1 observations and 5 variables.
+NOTE: There were 395 observations read from the data set WORK.SHOES.
+NOTE: The data set WORK.SUMMARY_OUTPUT has 5 observations and 4 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.03 seconds
+      
+
+187        * ods trace off; *(used to find object name in the past);
+188        
+189        /* ------------------------Question 2.f------------------------*/
+190        * run a proc print on summary_ods;
+191        title1 'Summary Statistics from ods output (data=shoes)';
+192        proc print data=summary_ods;
+193        run;
+
+5                                                          The SAS System                  Wednesday, September 20, 2023 10:52:27 AM
+
+NOTE: There were 1 observations read from the data set WORK.SUMMARY_ODS.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+194        
+195        * run a proc print on shoes;
+196        title1 'Summary Statistics from output out (data=shoes)';
+197        proc print data=summary_ods;
+198        run;
+
+NOTE: There were 1 observations read from the data set WORK.SUMMARY_ODS.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+199        
+200        ods pdf close;
+NOTE: ODS PDF printed 4 pages to /home/u63543119/BIOS511/Output/lab8_730460523.pdf.
+201        
+202        proc printto; run;
+
