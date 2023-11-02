@@ -1,0 +1,225 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+71         
+72         /****************************************************************************
+73         *
+74         * Project : BIOS 511 Lab 18
+75         *
+76         * Program name : lab18_730460523.sas
+77         *
+78         * Author : Katie Chai
+79         *
+80         * Date created : 2023-11-1
+81         *
+82         * Purpose : This program is designed to apply the key points of the lecture:
+83         * 1) Using arrays to create new variables or alter values of existing variables
+84         *
+85         * Revision History :
+86         *
+87         * Note: Standard header taken from :
+88         * https://www.phusewiki.org/wiki/index.php?title=Program_Header
+89         ****************************************************************************/
+90         
+91         %put %upcase(no)TE: Program being run by 730460523;
+NOTE: Program being run by 730460523
+92         options nofullstimer;
+93         
+94         /* ------------------------LIBNAME------------------------*/
+95         * assigns libref for class data;
+96         LIBNAME classDat "/home/u63543119/my_shared_file_links/u49231441/Data" access=readonly;
+NOTE: Libref CLASSDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/my_shared_file_links/u49231441/Data
+97         
+98         * assigns libref for my data;
+99         LIBNAME myDat "/home/u63543119/BIOS511/Data";
+NOTE: Libref MYDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/BIOS511/Data
+100        
+101        * create an pdf file that contains selected information below;
+102        ods pdf file='/home/u63543119/BIOS511/Output/lab18_730460523.pdf';
+NOTE: Writing ODS PDF output to DISK destination "/home/u63543119/BIOS511/Output/lab18_730460523.pdf", printer "PDF".
+103        
+104        /* ------------------------Question 1------------------------*/
+105        * Create a new temporary data set based on the prices data set in the course folder;
+106        data prices_profit;
+107        	set classDat.prices;
+108        	
+109        	array price_arr{15} price1-price15;
+110        	array profit_arr{15} profit1-profit15;
+2                                                          The SAS System                    Thursday, November  2, 2023 11:37:07 AM
+
+111        	
+112        	do i=1 to 15;
+113        		profit_arr{i} = price_arr{i} - discount;
+114        	end;
+115        	
+116        	format profit1-profit15 dollar8.2;
+117        	drop i price1-price15 discount;
+118        run;
+
+NOTE: There were 1000 observations read from the data set CLASSDAT.PRICES.
+NOTE: The data set WORK.PRICES_PROFIT has 1000 observations and 15 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.02 seconds
+      
+
+119        
+120        /* ------------------------Question 2------------------------*/
+121        * The goal of this task is to determine which of the profit values is the highest among the 15 and to create a variable
+121      ! that contains the variable name of that particular profit;
+122        data prices_profit_max;
+123        	set prices_profit;
+124        	length max_profit $10;
+125        	
+126        	array profit_arr{15} profit1-profit15;
+127        	hold = 0; * holding variable;
+128        	
+129        	do i=1 to 15;
+130        		if profit_arr{i} > hold then do;
+131        			hold = profit_arr{i};
+132        			max_profit = vname(profit_arr{i});
+133        		end;
+134        	end;
+135        	drop i;
+136        run;
+
+NOTE: There were 1000 observations read from the data set WORK.PRICES_PROFIT.
+NOTE: The data set WORK.PRICES_PROFIT_MAX has 1000 observations and 17 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+137        
+138        /* ------------------------Question 3------------------------*/
+139        * Run a PROC FREQ against the character variable created in #2 to see the distribution of highest price point;
+140        title1 'PROC FREQ (data=prices_profit_max)';
+141        title2 'Shows the distribution of highest price point';
+142        proc freq data=prices_profit_max;
+143        	tables max_profit;
+144        run;
+
+NOTE: There were 1000 observations read from the data set WORK.PRICES_PROFIT_MAX.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.03 seconds
+      
+
+3                                                          The SAS System                    Thursday, November  2, 2023 11:37:08 AM
+
+145        
+146        /* ------------------------Question 4------------------------*/
+147        * In a temporary data set, using arrays, create numeric 1/0 variables for each one, where 1 represents Yes and 0
+147      ! represents all other values;
+148        data birthwgt_temp;
+149        	set sashelp.birthwgt;
+150        	array yes_no{6} lowbirthwgt married drinking death smoking somecollege;
+151        	array new_variables{6} new_lowbirthwgt new_married new_drinking new_death new_smoking new_somecollege;
+152        	
+153        	do i=1 to 6;
+154        		if yes_no{i} = 'Yes' then new_variables{i} = 1;
+155        		else new_variables{i} = 0;
+156        	end;
+157        	drop i;
+158        run;
+
+NOTE: There were 100000 observations read from the data set SASHELP.BIRTHWGT.
+NOTE: The data set WORK.BIRTHWGT_TEMP has 100000 observations and 14 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      cpu time            0.04 seconds
+      
+
+159        
+160        /* ------------------------Question 5------------------------*/
+161        * Generate Chi-square statics for the numeric versions of the low birth weight and drinking variables created in #4.
+161      ! HINT: PROC FREQ;
+162        * Run a PROC FREQ against the character variable created in #2 to see the distribution of highest price point;
+163        
+164        * first sorting for by statement in proc freq;
+165        proc sort data=birthwgt_temp;
+166        	by race;
+167        run;
+
+NOTE: There were 100000 observations read from the data set WORK.BIRTHWGT_TEMP.
+NOTE: The data set WORK.BIRTHWGT_TEMP has 100000 observations and 14 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.03 seconds
+      cpu time            0.04 seconds
+      
+
+168        
+169        title1 'PROC FREQ (data=birthwgt_temp)';
+170        title2 'Chi-square statics for the numeric versions of the low birth weight and drinking variables';
+171        ods select chisq;
+172        proc freq data=birthwgt_temp notitle;
+173        	tables new_lowbirthwgt*new_drinking / chisq;
+174        	by race;
+175        run;
+
+NOTE: There were 100000 observations read from the data set WORK.BIRTHWGT_TEMP.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.07 seconds
+      cpu time            0.07 seconds
+      
+
+176        ods select all;
+177        
+4                                                          The SAS System                    Thursday, November  2, 2023 11:37:08 AM
+
+178        /* ------------------------Question 6------------------------*/
+179        * Create a new data set based on the sashelp.heart data set;
+180        data heart_temp;
+181        	set sashelp.heart;
+182        	array uppercase_vars{*} _character_;
+183        	array eight_vars{*} _numeric_;
+184        	
+185        	do i=1 to dim(uppercase_vars);
+186        		uppercase_vars{i} = upcase(uppercase_vars{i});
+187        	end;
+188        	
+189        	do j=1 to dim(eight_vars);
+190        		if not missing(eight_vars{j}) then eight_vars{j} = eight_vars{j} * 1.08;
+191        	end;
+192        	
+193        	if sex='MALE' and status='ALIVE' and weight > 180;
+194        	
+195        	drop i j;
+196        run;
+
+NOTE: There were 5209 observations read from the data set SASHELP.HEART.
+NOTE: The data set WORK.HEART_TEMP has 611 observations and 17 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+197        
+198        
+199        /* ------------------------Question 7------------------------*/
+200        * Print the first ten observations of data set created in #6;
+201        title1 'PROC PRINT (data=heart_temp)';
+202        title2 'First 10 observations from data set';
+203        proc print data=heart_temp (obs=10);
+204        	var weight bp_status;
+205        run;
+
+NOTE: There were 10 observations read from the data set WORK.HEART_TEMP.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+206        
+207        /* ------------------------CLOSING------------------------*/
+208        ods pdf close;
+NOTE: ODS PDF printed 7 pages to /home/u63543119/BIOS511/Output/lab18_730460523.pdf.
+209        
+210        proc printto; run;
+

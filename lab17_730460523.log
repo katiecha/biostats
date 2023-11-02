@@ -1,0 +1,189 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+71         
+72         /****************************************************************************
+73         *
+74         * Project : BIOS 511 Lab 17
+75         *
+76         * Program name : lab17_730460523.sas
+77         *
+78         * Author : Katie Chai
+79         *
+80         * Date created : 2023-10-30
+81         *
+82         * Purpose : This program is designed to apply the key points of the lecture:
+83         * 1) Writing DO loops
+84         *
+85         * Revision History :
+86         *
+87         * Note: Standard header taken from :
+88         * https://www.phusewiki.org/wiki/index.php?title=Program_Header
+89         ****************************************************************************/
+90         
+91         %put %upcase(no)TE: Program being run by 730460523;
+NOTE: Program being run by 730460523
+92         options nofullstimer;
+93         
+94         /* ------------------------LIBNAME------------------------*/
+95         * assigns libref for class data;
+96         LIBNAME classDat "/home/u63543119/my_shared_file_links/u49231441/Data" access=readonly;
+NOTE: Libref CLASSDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/my_shared_file_links/u49231441/Data
+97         
+98         * assigns libref for my data;
+99         LIBNAME myDat "/home/u63543119/BIOS511/Data";
+NOTE: Libref MYDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/BIOS511/Data
+100        
+101        * create an pdf file that contains selected information below;
+102        ods pdf file='/home/u63543119/BIOS511/Output/lab17_730460523.pdf';
+NOTE: Writing ODS PDF output to DISK destination "/home/u63543119/BIOS511/Output/lab17_730460523.pdf", printer "PDF".
+103        
+104        /* ------------------------Question 1------------------------*/
+105        * Use an iterative DO loop to create a brand-new, temporary data set with one observation for every day of October 2023
+105      ! through December of 2023;
+106        data oct_dec;
+107        	do day = '01OCT2023'd to '31DEC2023'd; * October 2023 to December 2023;
+108        		random = rand('GAMMA', 5); * Random number with gamma distribution and numeric constant of 5;
+109        		output;
+2                                                          The SAS System                    Thursday, November  2, 2023 11:31:30 AM
+
+110        	end;
+111        	format day date9.;
+112        run;
+
+NOTE: The data set WORK.OCT_DEC has 92 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+113        
+114        /* ------------------------Question 2------------------------*/
+115        * Run a PROC MEANS on the data set created in #1;
+116        title1 'PROC MEANS (data=oct_dec)';
+117        title2 'Subset to November Records';
+118        proc means data=oct_dec;
+119        	where '01NOV2023'd <= day <= '30NOV2023'd ;
+120        	var random;
+121        run;
+
+NOTE: There were 30 observations read from the data set WORK.OCT_DEC.
+      WHERE (day>='01NOV2023'D and day<='30NOV2023'D);
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.03 seconds
+      
+
+122        
+123        /* ------------------------Question 3------------------------*/
+124        * Create a temporary data set based on the sashelp.stocks data set;
+125        data stocks_temp;
+126        	set sashelp.stocks;
+127        	
+128        	where stock='Intel' and date='02JUN2003'd;
+129        	
+130        	do i=1 to 5;
+131        		adjclose = adjclose * 1.11;
+132        		date = INTNX('year', date, 1, 's');
+133        		output;
+134        	end;
+135        	keep stock date adjclose;
+136        run;
+
+NOTE: There were 1 observations read from the data set SASHELP.STOCKS.
+      WHERE (stock='Intel') and (date='02JUN2003'D);
+NOTE: The data set WORK.STOCKS_TEMP has 5 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+137        
+138        /* ------------------------Question 4------------------------*/
+139        * Print the data set created in #3;
+140        title1 'PROC PRINT (data=stocks_temp)';
+141        title2 'Data set created using DO loop';
+142        proc print data=stocks_temp;
+143        run;
+3                                                          The SAS System                    Thursday, November  2, 2023 11:31:30 AM
+
+
+NOTE: There were 5 observations read from the data set WORK.STOCKS_TEMP.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+144        
+145        /* ------------------------Question 5------------------------*/
+146        * Copy the DATA step you wrote for #3;
+147        * Using a DO UNTIL loop;
+148        data stocks_temp2;
+149        	set sashelp.stocks;
+150        	
+151        	where stock='Intel' and date='02JUN2003'd;
+152        	
+153        	do until (adjclose > 200);
+154        		adjclose = adjclose * 1.11;
+155        		date = INTNX('year', date, 1, 's');
+156        		output;
+157        	end;
+158        	keep stock date adjclose;
+159        run;
+
+NOTE: There were 1 observations read from the data set SASHELP.STOCKS.
+      WHERE (stock='Intel') and (date='02JUN2003'D);
+NOTE: The data set WORK.STOCKS_TEMP2 has 23 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+160        
+161        /* ------------------------Question 6------------------------*/
+162        * Print the data set created in #5;
+163        title1 'PROC PRINT (data=stocks_temp2)';
+164        title2 'Data set created using DO UNTIL loop';
+165        proc print data=stocks_temp2;
+166        run;
+
+NOTE: There were 23 observations read from the data set WORK.STOCKS_TEMP2.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.03 seconds
+      
+
+167        
+168        /* ------------------------Question 7------------------------*/
+169        * Use a DATA _NULL_ and PUTLOG statement to write the patient number of patients who are 55 years old, receiving
+169      ! treatment 2 in the prostate data set in the course folder to the log;
+170        data _null_;
+171          set classDat.prostate;
+NOTE: Data file CLASSDAT.PROSTATE.DATA is in a format that is native to another host, or the file encoding does not match the 
+      session encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce 
+      performance.
+172          if age=55 and treatment=2 then putlog patientnumber=;
+173        run;
+
+4                                                          The SAS System                    Thursday, November  2, 2023 11:31:30 AM
+
+PatientNumber=192
+NOTE: There were 506 observations read from the data set CLASSDAT.PROSTATE.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+174        
+175        /* ------------------------CLOSING------------------------*/
+176        ods pdf close;
+NOTE: ODS PDF printed 3 pages to /home/u63543119/BIOS511/Output/lab17_730460523.pdf.
+177        
+178        proc printto; run;
+
