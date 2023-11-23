@@ -1,0 +1,196 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              289.03k
+      OS Memory           20128.00k
+      Timestamp           10/26/2023 01:45:05 AM
+      Step Count                        24  Switch Count  0
+      Page Faults                       0
+      Page Reclaims                     34
+      Page Swaps                        0
+      Voluntary Context Switches        7
+      Involuntary Context Switches      0
+      Block Input Operations            0
+      Block Output Operations           0
+      
+
+71         
+72         /****************************************************************************
+73         *
+74         * Project : BIOS 511 Lab 16
+75         *
+76         * Program name : lab16_730460523.sas
+77         *
+78         * Author : Katie Chai
+79         *
+80         * Date created : 2023-10-25
+81         *
+82         * Purpose : This program is designed to apply the key points of the lecture:
+83         * 1) Applying SAS-supplied formats
+84         * 2) Creating user-defined formats
+85         * 3) Creating new variables through the use of formats
+86         *
+87         * Revision History :
+88         *
+89         * Note: Standard header taken from :
+90         * https://www.phusewiki.org/wiki/index.php?title=Program_Header
+91         ****************************************************************************/
+92         
+93         %put %upcase(no)TE: Program being run by 730460523;
+NOTE: Program being run by 730460523
+94         options nofullstimer;
+95         
+96         /* ------------------------LIBNAME------------------------*/
+97         * assigns libref for class data;
+98         LIBNAME classDat "/home/u63543119/my_shared_file_links/u49231441/Data" access=readonly;
+NOTE: Libref CLASSDAT refers to the same physical library as _TEMP1.
+NOTE: Libref CLASSDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/my_shared_file_links/u49231441/Data
+99         
+100        * assigns libref for my data;
+101        LIBNAME myDat "/home/u63543119/BIOS511/Data";
+2                                                          The SAS System                    Wednesday, October 25, 2023 09:45:05 PM
+
+NOTE: Libref MYDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/BIOS511/Data
+102        
+103        * create an pdf file that contains selected information below;
+104        ods pdf file='/home/u63543119/BIOS511/Output/lab16_730460523.pdf';
+NOTE: Writing ODS PDF output to DISK destination "/home/u63543119/BIOS511/Output/lab16_730460523.pdf", printer "PDF".
+105        
+106        /* ------------------------Question 1------------------------*/
+107        * Use PROC FORMAT to create a format for a numeric variable;
+108        proc format;
+109        	
+109      !  value yes_no_format
+110        		0 = 'No'
+111        		1 = 'Yes';
+NOTE: Format YES_NO_FORMAT has been output.
+112        run;
+
+NOTE: PROCEDURE FORMAT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+113        
+114        /* ------------------------Question 2------------------------*/
+115        * Use PROC FORMAT to create a format for a numeric variable;
+116        title1 'PROC FORMAT';
+117        title2 'Numeric Formats for Marital Status';
+118        proc format fmtlib;
+119        	
+119      !  value marital_format
+120        		1 = 'Single'
+121        		2 = 'Married'
+122        		3 = 'Separated'
+123        		4 = 'Divorced'
+124        		5 = 'Widowed';
+NOTE: Format MARITAL_FORMAT has been output.
+125        run;
+
+NOTE: PROCEDURE FORMAT used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+126        
+127        /* ------------------------Question 3------------------------*/
+128        * Create a stacked vertical bar graph using SGPLOT and the course.depression data set;
+129        title1 'PROC SGPLOT (data=classDat.depression)';
+130        title2 'Stacked Vertical Bar Graph';
+131        proc sgplot data=classDat.depression;
+132        	vbar marital / group=acuteillness seglabel name="vbar_chart";
+133        	format marital marital_format.
+134        		acuteillness yes_no_format.;
+135        	keylegend "vbar_chart" / position=topright location=inside across=1;		
+136        run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           2.16 seconds
+3                                                          The SAS System                    Wednesday, October 25, 2023 09:45:08 PM
+
+      cpu time            0.09 seconds
+      
+NOTE: There were 49 observations read from the data set CLASSDAT.DEPRESSION.
+
+137        
+138        /* ------------------------Question 4------------------------*/
+139        * Calculate the difference in days between multiple dates in the dm data set;
+140        data dm_edited;
+141        	set classDat.dm;
+142        	num_informed_consent = input(RFICDTC, yymmdd10.);
+143        	num_first_study_treatment = input(RFXSTDTC, yymmdd10.);
+144        	num_last_study_treatment = input(RFXENDTC, yymmdd10.);
+145        	consent_treatment_diff = num_first_study_treatment - num_informed_consent;
+146        	first_last_diff = num_last_study_treatment - num_first_study_treatment;
+147        run;
+
+NOTE: There were 602 observations read from the data set CLASSDAT.DM.
+NOTE: The data set WORK.DM_EDITED has 602 observations and 20 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+148        
+149        /* ------------------------Question 5------------------------*/
+150        * Run a PROC MEANS on the data set created in #4;
+151        title1 'PROC MEANS (data=dm_edited)';
+152        title2 'Classifying Data by Sex and Race';
+153        proc means data=dm_edited;
+154        	class sex race;
+155        	var consent_treatment_diff first_last_diff;
+156        run;
+
+NOTE: There were 602 observations read from the data set WORK.DM_EDITED.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.07 seconds
+      cpu time            0.08 seconds
+      
+
+157        
+158        /* ------------------------Question 6------------------------*/
+159        * Create a temporary version of the budget data set in the course folder;
+160        data budget_edited;
+161        	set classDat.budget;
+162        	length char_per_change $15;
+163        	per_change = (yr2020-yr2019)/yr2019;
+164        	char_per_change = put(per_change, percent8.2);
+165        	label char_per_change = "Character Percent Change Variable";
+166        run;
+
+NOTE: There were 12 observations read from the data set CLASSDAT.BUDGET.
+NOTE: The data set WORK.BUDGET_EDITED has 12 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+167        
+4                                                          The SAS System                    Wednesday, October 25, 2023 09:45:08 PM
+
+168        /* ------------------------Question 7------------------------*/
+169        * Print the first ten observations from the data set created in #6;
+170        title1 'PROC PRINT (data=budget_edited)';
+171        title2 'Printing First 10 Obs';
+172        proc print data=budget_edited (obs=10) label;
+173        	var department char_per_change;
+174        run;
+
+NOTE: There were 10 observations read from the data set WORK.BUDGET_EDITED.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+175        
+176        /* ------------------------CLOSING------------------------*/
+177        ods pdf close;
+NOTE: ODS PDF printed 4 pages to /home/u63543119/BIOS511/Output/lab16_730460523.pdf.
+178        
+179        proc printto; run;
+

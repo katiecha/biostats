@@ -1,0 +1,202 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              372.28k
+      OS Memory           32928.00k
+      Timestamp           09/27/2023 02:30:10 PM
+      Step Count                        366  Switch Count  0
+      Page Faults                       0
+      Page Reclaims                     18
+      Page Swaps                        0
+      Voluntary Context Switches        6
+      Involuntary Context Switches      0
+      Block Input Operations            0
+      Block Output Operations           0
+      
+
+71         
+72         /****************************************************************************
+73         *
+74         * Project : BIOS 511 Lab 9
+75         *
+76         * Program name : lab9_730460523.sas
+77         *
+78         * Author : Katie Chai
+79         *
+80         * Date created : 2023-09-27
+81         *
+82         * Purpose : This program is designed to apply the key points of the lecture:
+83         * 1) Generating default ODS Graphics outputs
+84         * 2) Selecting the desired plots
+85         *
+86         * Revision History :
+87         *
+88         * Note: Standard header taken from :
+89         * https://www.phusewiki.org/wiki/index.php?title=Program_Header
+90         ****************************************************************************/
+91         
+92         %put %upcase(no)TE: Program being run by 730460523;
+NOTE: Program being run by 730460523
+93         options nofullstimer;
+94         
+95         /* ------------------------LIBNAME------------------------*/
+96         * assigns libref for class data;
+97         LIBNAME classDat "/home/u63543119/my_shared_file_links/u49231441/Data" access=readonly;
+NOTE: Libref CLASSDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/my_shared_file_links/u49231441/Data
+98         
+99         * assigns libref for my data;
+100        LIBNAME myDat "/home/u63543119/BIOS511/Data";
+NOTE: Libref MYDAT was successfully assigned as follows: 
+      Engine:        V9 
+2                                                          The SAS System                  Wednesday, September 27, 2023 10:30:10 AM
+
+      Physical Name: /home/u63543119/BIOS511/Data
+101        
+102        * create an pdf file that contains selected information below;
+103        ods pdf file='/home/u63543119/BIOS511/Output/lab9_730460523.pdf';
+NOTE: Writing ODS PDF output to DISK destination "/home/u63543119/BIOS511/Output/lab9_730460523.pdf", printer "PDF".
+104        
+105        /* ------------------------Question 1------------------------*/
+106        * ods trace on;
+107        
+108        * create temp data set from sashelp.bweight data set;
+109        data bweight;
+110        	set sashelp.bweight;
+111        run;
+
+NOTE: There were 50000 observations read from the data set SASHELP.BWEIGHT.
+NOTE: The data set WORK.BWEIGHT has 50000 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+112        
+113        * sorts data set by var=married;
+114        proc sort data=bweight;
+115        	by married;
+116        run;
+
+NOTE: There were 50000 observations read from the data set WORK.BWEIGHT.
+NOTE: The data set WORK.BWEIGHT has 50000 observations and 10 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.01 seconds
+      
+
+117        
+118        * selects only the plots for the ods;
+119        ods select plots;
+120        
+121        * Run a PROC UNIVARIATE on the sashelp.bweight data set;
+122        title1 'PROC UNIVARIATE sorted by married with analysis var weight(data=sashelp.bweight)';
+123        proc univariate data=bweight plots; * request all available plots;
+124        	by married; * use mother's married status as the BY var;
+125        	var weight; * use baby's birth weight as the analysis var;
+126        run;
+
+NOTE: PROCEDURE UNIVARIATE used (Total process time):
+      real time           2.68 seconds
+      cpu time            1.65 seconds
+      
+
+127        
+128        * ods trace off;
+129        
+130        /* ------------------------Question 2------------------------*/
+131        * create temp data set from classDat.dm data set;
+132        data dm;
+133        	set classDat.dm;
+134        run;
+3                                                          The SAS System                  Wednesday, September 27, 2023 10:30:12 AM
+
+
+NOTE: There were 602 observations read from the data set CLASSDAT.DM.
+NOTE: The data set WORK.DM has 602 observations and 15 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+135        
+136        * Run a PROC FREQ on the dm data set in the course folder, under the course data folder;
+137        title1 'PROC FREQ crosstabulation of armcd and race, grouped by armcd (data=classDat.dm)';
+138        proc freq data=dm;
+139        	tables armcd*race / plots=(freqplot(groupby=row twoway=cluster)) nopercent nocol norow;
+140        run;
+
+NOTE: There were 602 observations read from the data set WORK.DM.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.27 seconds
+      cpu time            0.17 seconds
+      
+
+141        
+142        /* ------------------------Question 3------------------------*/
+143        * create temp data set from classDat.depression data set;
+144        data depression;
+145        	set classDat.depression;
+146        run;
+
+NOTE: There were 49 observations read from the data set CLASSDAT.DEPRESSION.
+NOTE: The data set WORK.DEPRESSION has 49 observations and 37 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+147        
+148        * Run a PROC FREQ on the depression data set in the course folder;
+149        title1 'PROC FREQ crosstabulation of bed days and accute illness, (data=classDat.depression)';
+150        proc freq data=depression;
+151        	tables beddays*acuteillness / plots=(agreeplot) agree;
+152        run;
+
+NOTE: There were 49 observations read from the data set WORK.DEPRESSION.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.18 seconds
+      cpu time            0.09 seconds
+      
+
+153        
+154        /* ------------------------Question 4------------------------*/
+155        * create temp data set from classDat.dmvs data set;
+156        data dmvs;
+157        	set classDat.dmvs;
+158        run;
+
+NOTE: There were 602 observations read from the data set CLASSDAT.DMVS.
+NOTE: The data set WORK.DMVS has 602 observations and 20 variables.
+NOTE: DATA statement used (Total process time):
+4                                                          The SAS System                  Wednesday, September 27, 2023 10:30:13 AM
+
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+159        
+160        * Replicate the PROC GLM code from the lecture notes;
+161        title1 'PROC GLM diagnostic plots with country var (data=classDat.dmvs)';
+162        proc glm data=dmvs plots=(diagnostics);
+163        	class country;
+164        	model cfb = country sysbp0 / solution;
+165        run;
+
+166        quit;
+
+NOTE: PROCEDURE GLM used (Total process time):
+      real time           0.87 seconds
+      cpu time            0.49 seconds
+      
+
+167        
+168        /* ------------------------CLOSING------------------------*/
+169        * closes ods pdf statement;
+170        ods pdf close;
+NOTE: ODS PDF printed 9 pages to /home/u63543119/BIOS511/Output/lab9_730460523.pdf.
+171        
+172        proc printto; run;
+

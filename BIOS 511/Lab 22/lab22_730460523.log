@@ -1,0 +1,285 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+71         
+72         /****************************************************************************
+73         *
+74         * Project : BIOS 511 Lab 22
+75         *
+76         * Program name : lab22_730460523.sas
+77         *
+78         * Author : Katie Chai
+79         *
+80         * Date created : 2023-11-15
+81         *
+82         * Purpose : This program is designed to apply the key points of the lecture:
+83         * 1) Directly inputting data
+84         * 2) Reading raw data files
+85         * 3) Importing data files
+86         *
+87         * Revision History :
+88         *
+89         * Note: Standard header taken from :
+90         * https://www.phusewiki.org/wiki/index.php?title=Program_Header
+91         ****************************************************************************/
+92         
+93         %put %upcase(no)TE: Program being run by 730460523;
+NOTE: Program being run by 730460523
+94         options nofullstimer;
+95         
+96         /* ------------------------LIBNAME------------------------*/
+97         * assigns libref for class data;
+98         LIBNAME classDat "/home/u63543119/my_shared_file_links/u49231441/Data" access=readonly;
+NOTE: Libref CLASSDAT refers to the same physical library as DATA511.
+NOTE: Libref CLASSDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/my_shared_file_links/u49231441/Data
+99         
+100        * assigns libref for my data;
+101        LIBNAME myDat "/home/u63543119/BIOS511/Data";
+NOTE: Libref MYDAT refers to the same physical library as MYDATA.
+NOTE: Libref MYDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/BIOS511/Data
+102        
+103        * create an pdf file that contains selected information below;
+104        ods pdf file='/home/u63543119/BIOS511/Output/lab22_730460523.pdf';
+NOTE: Writing ODS PDF output to DISK destination "/home/u63543119/BIOS511/Output/lab22_730460523.pdf", printer "PDF".
+105        
+106        /* ------------------------Question 1------------------------*/
+107        /* This goal of this task is to import the country.dat file in the course folder using
+108        PROC IMPORT. */
+2                                                          The SAS System                    Saturday, November 18, 2023 09:47:09 PM
+
+109        
+110        * Write a FILENAME statement that assigns a fileref with the country.dat file;
+111        filename coun '/home/u63543119/my_shared_file_links/u49231441/Data/country.dat';
+112        
+113        proc import datafile=coun out=country dbms=dlm replace;
+114            delimiter='!';
+115            getnames=no;
+116        run;
+
+NOTE: Unable to open parameter catalog: SASUSER.PARMS.PARMS.SLIST in update mode. Temporary parameter values will be saved to 
+WORK.PARMS.PARMS.SLIST.
+117         /**********************************************************************
+118         *   PRODUCT:   SAS
+119         *   VERSION:   9.4
+120         *   CREATOR:   External File Interface
+121         *   DATE:      19NOV23
+122         *   DESC:      Generated SAS Datastep Code
+123         *   TEMPLATE SOURCE:  (None Specified.)
+124         ***********************************************************************/
+125            data WORK.COUNTRY    ;
+126            %let _EFIERR_ = 0; /* set the ERROR detection macro variable */
+127            infile COUN delimiter = '!' MISSOVER DSD  ;
+128               informat VAR1 $2. ;
+129               informat VAR2 $20. ;
+130               format VAR1 $2. ;
+131               format VAR2 $20. ;
+132            input
+133                        VAR1  $
+134                        VAR2  $
+135            ;
+136            if _ERROR_ then call symputx('_EFIERR_',1);  /* set ERROR detection macro variable */
+137            run;
+
+NOTE: The infile COUN is:
+      Filename=/home/u63543119/my_shared_file_links/u49231441/Data/country.dat,
+      Owner Name=u49231441,Group Name=nobody,
+      Access Permission=-rw-r--r--,
+      Last Modified=04Nov2021:15:57:38,
+      File Size (bytes)=19278
+
+NOTE: 238 records were read from the infile COUN.
+      The minimum record length was 80.
+      The maximum record length was 80.
+NOTE: The data set WORK.COUNTRY has 238 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+238 rows created in WORK.COUNTRY from COUN.
+  
+  
+  
+NOTE: WORK.COUNTRY data set was successfully created.
+NOTE: The data set WORK.COUNTRY has 238 observations and 2 variables.
+NOTE: PROCEDURE IMPORT used (Total process time):
+      real time           0.07 seconds
+      cpu time            0.07 seconds
+3                                                          The SAS System                    Saturday, November 18, 2023 09:47:09 PM
+
+      
+
+138        
+139        /* ------------------------Question 2------------------------*/
+140        /* With a DATA step, modify the data set created in #1. */
+141        data country_import;
+142            set country;
+143            rename var1=countryabbrev var2=countryname;
+144            label countryabbrev='Country Abbreviation' countryname='Country Name';
+145        run;
+
+NOTE: Variable countryabbrev is uninitialized.
+NOTE: Variable countryname is uninitialized.
+NOTE: There were 238 observations read from the data set WORK.COUNTRY.
+NOTE: The data set WORK.COUNTRY_IMPORT has 238 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+146        
+147        /* ------------------------Question 3------------------------*/
+148        /* The goal of this task is to read in the country.dat file in the course data folder using
+149        a DATA step. */
+150        data country_data;
+151        	infile coun dlm='!';
+152        	length countryabbrev $2 countryname $20;
+153            input countryabbrev countryname;
+154        	label countryabbrev='Country Abbreviation' countryname='Country Name';
+155        run;
+
+NOTE: The infile COUN is:
+      Filename=/home/u63543119/my_shared_file_links/u49231441/Data/country.dat,
+      Owner Name=u49231441,Group Name=nobody,
+      Access Permission=-rw-r--r--,
+      Last Modified=04Nov2021:15:57:38,
+      File Size (bytes)=19278
+
+NOTE: 238 records were read from the infile COUN.
+      The minimum record length was 80.
+      The maximum record length was 80.
+NOTE: The data set WORK.COUNTRY_DATA has 238 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+156        
+157        /* ------------------------Question 4------------------------*/
+158        /* Run a PROC COMPARE between the data sets created in #2 and #3. It is ok if it shows
+159        difference with informats. */
+160        title1 'Difference between data sets created in #2 and #3';
+161        title2 'PROC COMPARE (base=country_import, compare=country_data)';
+162        proc compare base=country_import compare=country_data;
+163        run;
+
+NOTE: There were 238 observations read from the data set WORK.COUNTRY_IMPORT.
+NOTE: There were 238 observations read from the data set WORK.COUNTRY_DATA.
+4                                                          The SAS System                    Saturday, November 18, 2023 09:47:09 PM
+
+NOTE: PROCEDURE COMPARE used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+164        
+165        /* ------------------------Question 5------------------------*/
+166        /* Data like the country information from #1 and #3 are often used to create user-defined
+167        formats. The analysis data sets often contain just a code and a separate file contains the
+168        mappings from code to a useful value. The goal of this task is to create a format from
+169        the variables in the data set. */
+170        
+171        * Using the data set from #1: Create a new data set;
+172        data country_format;
+173            set country_import;
+174            start = countryabbrev;
+175            label = countryname;
+176            retain fmtname "$cnty";
+177        run;
+
+NOTE: There were 238 observations read from the data set WORK.COUNTRY_IMPORT.
+NOTE: The data set WORK.COUNTRY_FORMAT has 238 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+178        
+179        * Use the following PROC FORMAT code to generate a format;
+180        proc format cntlin=country_format lib=work
+181        	fmtlib;
+NOTE: Format $CNTY has been output.
+182        run;
+
+NOTE: PROCEDURE FORMAT used (Total process time):
+      real time           0.04 seconds
+      cpu time            0.04 seconds
+      
+NOTE: There were 238 observations read from the data set WORK.COUNTRY_FORMAT.
+
+183        
+184        /* ------------------------Question 6------------------------*/
+185        /* Create a data set, using DATALINES, that holds your class schedule. */
+186        data katie_schedule;
+187            infile datalines dlm=',';
+188            length ClassName $20 SectionType $10 Building $50 Room $10 DayOfWeek $9 StartTime $5;
+189            input ClassName SectionType Building Room DayOfWeek StartTime time8.;
+                                                                             ______
+                                                                             485
+NOTE 485-185: Informat $TIME was not found or could not be loaded.
+
+190            label ClassName = 'Class Name'
+191                  SectionType = 'Section Type'
+192                  Building = 'Building'
+193                  Room = 'Room Number'
+194                  DayOfWeek = 'Day of Week'
+195                  StartTime = 'Class Start Time';
+196            format StartTime time.;
+5                                                          The SAS System                    Saturday, November 18, 2023 09:47:09 PM
+
+                                _____
+                                484
+NOTE 484-185: Format $TIME was not found or could not be loaded.
+
+197        
+198        datalines;
+
+NOTE: The data set WORK.KATIE_SCHEDULE has 12 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+211        ;
+212        run;
+213        
+214        /* ------------------------Question 7------------------------*/
+215        /* Print the data set created in #6. */
+216        
+217        * The order of the observations should be: day of week, start time;
+218        proc sort data=katie_schedule;
+219            by DayOfWeek StartTime;
+220        run;
+
+NOTE: There were 12 observations read from the data set WORK.KATIE_SCHEDULE.
+NOTE: The data set WORK.KATIE_SCHEDULE has 12 observations and 6 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+221        
+222        title1 'My Class Schedule';
+223        title2 'PROC PRINT (data=katie_schedule)';
+224        proc print data=katie_schedule noobs label;
+225        run;
+
+NOTE: There were 12 observations read from the data set WORK.KATIE_SCHEDULE.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.02 seconds
+      
+
+226        
+227        /* ------------------------CLOSING------------------------*/
+228        ods pdf close;
+NOTE: ODS PDF printed 7 pages to /home/u63543119/BIOS511/Output/lab22_730460523.pdf.
+229        
+230        proc printto; run;
+

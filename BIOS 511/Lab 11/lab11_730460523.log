@@ -1,0 +1,163 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+71         
+72         /****************************************************************************
+73         *
+74         * Project : BIOS 511 Lab 11
+75         *
+76         * Program name : lab11_730460523.sas
+77         *
+78         * Author : Katie Chai
+79         *
+80         * Date created : 2023-10-07
+81         *
+82         * Purpose : This program is designed to apply the key points of the lecture:
+83         * 1) Generating multiple plot types using PROC SGPANEL
+84         * 2) Creating similar graphs using both PROC SGPLOT and PROC SGPANEL
+85         *
+86         * Revision History :
+87         *
+88         * Note: Standard header taken from :
+89         * https://www.phusewiki.org/wiki/index.php?title=Program_Header
+90         ****************************************************************************/
+91         
+92         %put %upcase(no)TE: Program being run by 730460523;
+NOTE: Program being run by 730460523
+93         options nofullstimer;
+94         
+95         /* ------------------------LIBNAME------------------------*/
+96         * assigns libref for class data;
+97         LIBNAME classDat "/home/u63543119/my_shared_file_links/u49231441/Data" access=readonly;
+NOTE: Libref CLASSDAT refers to the same physical library as DATA511.
+NOTE: Libref CLASSDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/my_shared_file_links/u49231441/Data
+98         
+99         * assigns libref for my data;
+100        LIBNAME myDat "/home/u63543119/BIOS511/Data";
+NOTE: Libref MYDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/BIOS511/Data
+101        
+102        * create an pdf file that contains selected information below;
+103        ods pdf file='/home/u63543119/BIOS511/Output/lab11_730460523.pdf';
+NOTE: Writing ODS PDF output to DISK destination "/home/u63543119/BIOS511/Output/lab11_730460523.pdf", printer "PDF".
+104        
+105        /* ------------------------Question 1------------------------*/
+106        * create temp data set prostate from classDat.prostate;
+107        data prostate;
+108        	set classDat.prostate;
+NOTE: Data file CLASSDAT.PROSTATE.DATA is in a format that is native to another host, or the file encoding does not match the 
+2                                                          The SAS System                     Saturday, October  7, 2023 10:46:51 PM
+
+      session encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce 
+      performance.
+109        run;
+
+NOTE: There were 506 observations read from the data set CLASSDAT.PROSTATE.
+NOTE: The data set WORK.PROSTATE has 506 observations and 18 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+110        
+111        * With PROC SGPANEL, create a panel of horizontal box plots;
+112        title1 'Tumor size paneled by treatment and stage';
+113        title2 '(Panel of horizontal box plots [data=classDat.prostate])';
+114        proc sgpanel data=prostate;
+115        	where tumorsize ne -9999; * Subset to a tumor size that is not -9999;
+116        	panelby treatment stage / columns=4; * Panel by the treatment and stage variables && Force the graphs to be in four
+116      ! columns;
+117        	hbox tumorsize / displaystats=(mean) outlierattrs=(color=red); 	* Use tumor size as the analysis variable && Use the
+117      ! DISPLAYSTATS option to display the mean value within each graph && Make the outlier marker color red;
+118        run;
+
+NOTE: PROCEDURE SGPANEL used (Total process time):
+      real time           0.27 seconds
+      cpu time            0.12 seconds
+      
+NOTE: There were 499 observations read from the data set WORK.PROSTATE.
+      WHERE tumorsize not = -9999;
+
+119        
+120        /* ------------------------Question 2------------------------*/
+121        * create temp data set preemies from classDat.preemies;
+122        data preemies;
+123        	set classDat.preemies;
+NOTE: Data file CLASSDAT.PREEMIES.DATA is in a format that is native to another host, or the file encoding does not match the 
+      session encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce 
+      performance.
+124        	label bw = 'Birth Weight';
+125        run;
+
+NOTE: There were 30 observations read from the data set CLASSDAT.PREEMIES.
+NOTE: The data set WORK.PREEMIES has 30 observations and 16 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+126        
+127        * With PROC SGPANEL, create panel of histograms with density curves;
+128        title1 'Histograms and density curves paneled by sex=0 or 1';
+129        title2 '(Panel of histograms with density curves [data=classDat.preemies])';
+130        proc sgpanel data=preemies noautolegend; * Suppress the creation of a legend, using the NOAUTOLEGEND option;
+131        	panelby sex / novarname; * Panel by the sex variable && Remove the variable names from the cell headings of the panel
+131      ! layout;
+132        	histogram bw;
+133        	density bw / lineattrs=(color=red);
+134        	rowaxis label='Percent (%)' values=(0 to 50 by 10);
+3                                                          The SAS System                     Saturday, October  7, 2023 10:46:52 PM
+
+135        run;
+
+NOTE: PROCEDURE SGPANEL used (Total process time):
+      real time           0.14 seconds
+      cpu time            0.05 seconds
+      
+NOTE: There were 30 observations read from the data set WORK.PREEMIES.
+
+136        
+137        /* ------------------------Question 3------------------------*/
+138        * create SORTED temp data set preemies from classDat.preemies;
+139        proc sort data=preemies out=preemies_sorted;
+140        	by sex; * Use a BY statement to create one graph for each visit;	
+141        run;
+
+NOTE: There were 30 observations read from the data set WORK.PREEMIES.
+NOTE: The data set WORK.PREEMIES_SORTED has 30 observations and 16 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+142        
+143        * Generate the same histograms and density curves as you did in #2, using PROC SGPLOT;
+144        title 'Histogram and density curve paneled by sex=0 or 1';
+145        title1 '(Histogram with density curve [data=classDat.preemies])';
+146        title2 '#byvar1 = #byval1';
+147        options nobyline;
+148        proc sgplot data=preemies_sorted;
+149        	by sex;
+150        	histogram bw;
+151        	density bw / lineattrs=(color=red);
+152        	yaxis values=(0 to 50 by 10) label='Percent (%)';
+153        run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.18 seconds
+      cpu time            0.08 seconds
+      
+NOTE: There were 30 observations read from the data set WORK.PREEMIES_SORTED.
+
+154        
+155        /* ------------------------CLOSING------------------------*/
+156        ods pdf close;
+NOTE: ODS PDF printed 4 pages to /home/u63543119/BIOS511/Output/lab11_730460523.pdf.
+157        
+158        proc printto; run;
+

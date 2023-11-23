@@ -1,0 +1,245 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+71         
+72         /****************************************************************************
+73         *
+74         * Project : BIOS 511 Lab 19
+75         *
+76         * Program name : lab19_730460523.sas
+77         *
+78         * Author : Katie Chai
+79         *
+80         * Date created : 2023-11-6
+81         *
+82         * Purpose : This program is designed to apply the key points of the lecture:
+83         * 1) Utilizing FIRST. and LAST. values for conditional execution
+84         * 2) Using RETAIN statements
+85         *
+86         * Revision History :
+87         *
+88         * Note: Standard header taken from :
+89         * https://www.phusewiki.org/wiki/index.php?title=Program_Header
+90         ****************************************************************************/
+91         
+92         %put %upcase(no)TE: Program being run by 730460523;
+NOTE: Program being run by 730460523
+93         options nofullstimer;
+94         
+95         /* ------------------------LIBNAME------------------------*/
+96         * assigns libref for class data;
+97         LIBNAME classDat "/home/u63543119/my_shared_file_links/u49231441/Data" access=readonly;
+NOTE: Libref CLASSDAT refers to the same physical library as _TEMP1.
+NOTE: Libref CLASSDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/my_shared_file_links/u49231441/Data
+98         
+99         * assigns libref for my data;
+100        LIBNAME myDat "/home/u63543119/BIOS511/Data";
+NOTE: Libref MYDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/BIOS511/Data
+101        
+102        * create an pdf file that contains selected information below;
+103        ods pdf file='/home/u63543119/BIOS511/Output/lab19_730460523.pdf';
+NOTE: Writing ODS PDF output to DISK destination "/home/u63543119/BIOS511/Output/lab19_730460523.pdf", printer "PDF".
+104        
+105        /* ------------------------Question 1------------------------*/
+106        /* Using a DATA Step, create a data set based on
+107        sashelp.baseball. The final data set should contain only one observation for each
+108        league-division combination. */
+109        proc sort data=sashelp.baseball out=baseball_sorted;
+2                                                          The SAS System                      Monday, November  6, 2023 11:18:26 AM
+
+110        	by league division;
+111        run;
+
+NOTE: There were 322 observations read from the data set SASHELP.BASEBALL.
+NOTE: The data set WORK.BASEBALL_SORTED has 322 observations and 24 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+112        
+113        data baseball_totals;
+114        	set baseball_sorted;
+115        	by league division;
+116        	retain cratbat_t crbb_t;
+117        	
+118        	if first.division then do;
+119        		cratbat_t = 0;
+120        		crbb_t = 0;
+121        	end;
+122        	
+123        	cratbat_t = cratbat_t + cratbat;
+124        	crbb_t = crbb_t + crbb;
+125        	
+126        	if last.division then do;
+127        		output;
+128        	end;
+129        	
+130        	label cratbat_t = 'Total Cratbat';
+131        	label crbb_t = 'Total Crbb';
+132        	keep league division cratbat_t crbb_t;
+133        run;
+
+NOTE: There were 322 observations read from the data set WORK.BASEBALL_SORTED.
+NOTE: The data set WORK.BASEBALL_TOTALS has 4 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+134        
+135        /* ------------------------Question 2------------------------*/
+136        /* Check your totals from #1. The values for #2a and #2b should be the same. */
+137        
+138        * PROC PRINT;
+139        title1 'PROC PRINT (data=baseball_totals)';
+140        proc print data=baseball_totals label; * display labels;
+141        run;
+
+NOTE: There were 4 observations read from the data set WORK.BASEBALL_TOTALS.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.03 seconds
+      
+
+142        
+143        * PROC MEANS;
+144        title1 'PROC MEANS (data=baseball_totals)';
+3                                                          The SAS System                      Monday, November  6, 2023 11:18:26 AM
+
+145        proc means data=sashelp.baseball sum;
+146        	class league division;
+147        	var cratbat crbb;
+148            label cratbat = 'Sum Cratbat' crbb = 'Sum Crbb';
+149        run;
+
+NOTE: There were 322 observations read from the data set SASHELP.BASEBALL.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.02 seconds
+      
+
+150        
+151        /* ------------------------Question 3------------------------*/
+152        /* Create a temporary version of the ae data set in the course folder.
+153        a. Standardize the value of the start date. The value of the start date does not
+154        always have a day, it might only contain a month and a year. In that situation,
+155        the day of the month should be the first. */
+156        data ae_edit;
+157        	set classDat.ae;
+158        	
+159        	if length(aestdtc) = 7 then aestdtc = catx('-',aestdtc,'01');
+160        	if length(aeendtc) = 7 then aeendtc = catx('-',aeendtc,'01');
+161        	
+162        	num_AESTDTC = input(AESTDTC, yymmdd10.);
+163        	num_AEENDTC = input(AEENDTC, yymmdd10.);
+164        	
+165        	format num_AESTDTC num_AEENDTC date9.; * add fav format;
+166        run;
+
+NOTE: There were 1177 observations read from the data set CLASSDAT.AE.
+NOTE: The data set WORK.AE_EDIT has 1177 observations and 12 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+167        
+168        /* ------------------------Question 4------------------------*/
+169        /* Sort the data set created in #3 by the subject and numeric start date. */
+170        proc sort data=ae_edit out=ae_edit_sort;
+171        	by usubjid num_AESTDTC;
+172        run;
+
+NOTE: There were 1177 observations read from the data set WORK.AE_EDIT.
+NOTE: The data set WORK.AE_EDIT_SORT has 1177 observations and 12 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+173        
+174        proc sort data=classDat.dm out=dm_sort;
+175        	by usubjid;
+176        run;
+
+NOTE: There were 602 observations read from the data set CLASSDAT.DM.
+NOTE: The data set WORK.DM_SORT has 602 observations and 15 variables.
+4                                                          The SAS System                      Monday, November  6, 2023 11:18:26 AM
+
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+177        
+178        /* ------------------------Question 5------------------------*/
+179        /* The goal of this task is to identify the earliest adverse event for each subject. Merge the
+180        sorted data set from #4 with the dm data set in the course folder. */
+181        data merge_ae_dm;
+182        	merge ae_edit_sort(in=ae_in) dm_sort;
+183        	by usubjid;
+184        	if ae_in and first.usubjid;
+185        	
+186        	num_rfxstdtc = input(rfxstdtc, yymmdd10.);
+187        	days_to_first_adverse = num_AESTDTC - num_rfxstdtc;
+188        	
+189        	label days_to_first_adverse = 'Number of days to the first adverse event';
+190        	drop num_rfxstdtc;
+191        run;
+
+NOTE: There were 1177 observations read from the data set WORK.AE_EDIT_SORT.
+NOTE: There were 602 observations read from the data set WORK.DM_SORT.
+NOTE: The data set WORK.MERGE_AE_DM has 462 observations and 26 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+192        
+193        /* ------------------------Question 6------------------------*/
+194        /* Use PROC SGPLOT to generate histograms for the number of days to the first adverse
+195        event in the data set created in #5. */
+196        proc sort data=merge_ae_dm out=merge_ae_dm_sort;
+197        	by arm;
+198        run;
+
+NOTE: There were 462 observations read from the data set WORK.MERGE_AE_DM.
+NOTE: The data set WORK.MERGE_AE_DM_SORT has 462 observations and 26 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+199        
+200        title1 'PROC SGPLOT (data=merge_ae_dm_sort)';
+201        proc sgplot data=merge_ae_dm_sort;
+202        	by arm;
+203        	histogram days_to_first_adverse;
+204        	density days_to_first_adverse / type=normal;
+205        	density days_to_first_adverse / type=kernel;
+206        	label arm = 'Arm';
+207        	keylegend / location=inside position=topright;
+208        run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.29 seconds
+      cpu time            0.12 seconds
+5                                                          The SAS System                      Monday, November  6, 2023 11:18:26 AM
+
+      
+NOTE: There were 462 observations read from the data set WORK.MERGE_AE_DM_SORT.
+
+209        
+210        /* ------------------------CLOSING------------------------*/
+211        ods pdf close;
+NOTE: ODS PDF printed 4 pages to /home/u63543119/BIOS511/Output/lab19_730460523.pdf.
+212        
+213        proc printto; run;
+
