@@ -1,0 +1,359 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+71         
+72         /****************************************************************************
+73         *
+74         * Project : BIOS 511 Lab 23
+75         *
+76         * Program name : lab23_730460523.sas
+77         *
+78         * Author : Katie Chai
+79         *
+80         * Date created : 2023-11-20
+81         *
+82         * Purpose : This program is designed to apply the key points of the lecture:
+83         * 1) Creating macro variables and using them in code
+84         *
+85         * Revision History :
+86         *
+87         * Note: Standard header taken from :
+88         * https://www.phusewiki.org/wiki/index.php?title=Program_Header
+89         ****************************************************************************/
+90         
+91         %put %upcase(no)TE: Program being run by 730460523;
+NOTE: Program being run by 730460523
+92         options nofullstimer;
+93         
+94         /* ------------------------LIBNAME------------------------*/
+95         * assigns libref for class data;
+96         LIBNAME classDat "/home/u63543119/my_shared_file_links/u49231441/Data" access=readonly;
+NOTE: Libref CLASSDAT refers to the same physical library as TEMP.
+NOTE: Libref CLASSDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/my_shared_file_links/u49231441/Data
+97         
+98         * assigns libref for my data;
+99         LIBNAME myDat "/home/u63543119/BIOS511/Data";
+NOTE: Libref MYDAT refers to the same physical library as PERM.
+NOTE: Libref MYDAT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/u63543119/BIOS511/Data
+100        
+101        /* ------------------------Question 1------------------------*/
+102        /* Create a macro variable to hold your PID. */
+103        %let macropid = 730460523;
+104        
+105        /* ------------------------Question 2------------------------*/
+106        /* Create a macro variable that holds the path where you store your output files. */
+107        %let macropath = /home/u63543119/BIOS511/Output/;
+108        
+109        /* ------------------------Question 3------------------------*/
+2                                                          The SAS System                    Saturday, November 25, 2023 11:17:21 PM
+
+110        /* Use the macro variables created in #1 and #2 in your ODS PDF statement that creates
+111        your output file. */
+112        ods pdf file = "&macropath.lab23_&macropid..pdf";
+NOTE: Writing ODS PDF output to DISK destination "/home/u63543119/BIOS511/Output/lab23_730460523.pdf", printer "PDF".
+113        
+114        /* ------------------------Question 4------------------------*/
+115        /* Create a macro variable containing the text: BIOS 511 LAB 23 Macro Variables. Use this
+116        macro variable as the first title in all of the generated output. */
+117        %let macrotitle = BIOS 511 LAB 23 Macro Variables;
+118        
+119        /* ------------------------Question 5------------------------*/
+120        /* The goal of this task is to put the student counts for each learning modality into macro
+121        variables. */
+122        title1 "&macrotitle.";
+123        title2 'PROC MEANS (data=classDat.learn_modalities)';
+124        proc means data=classDat.learn_modalities noprint;
+125        	class learning_modality;
+126        	var student_count;
+127        	output out=modsum sum=sumamt;
+128        run;
+
+NOTE: There were 429865 observations read from the data set CLASSDAT.LEARN_MODALITIES.
+NOTE: The data set WORK.MODSUM has 4 observations and 4 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.07 seconds
+      
+
+129        
+130        data _null_;
+131           set modsum;
+132           if learning_modality = 'In Person' then call symputx("count_in_person", sumamt);
+133           else if learning_modality = 'In Person' then call symputx("count_in_person", sumamt);
+134           else if learning_modality = 'Hybrid' then call symputx("count_hybrid", sumamt);
+135           else if learning_modality = 'Remote' then call symputx("count_remote", sumamt);
+136           if learning_modality = ' ' then call symputx("tots", sumamt);
+137        run;
+
+NOTE: There were 4 observations read from the data set WORK.MODSUM.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+138        
+139        /* ------------------------Question 6------------------------*/
+140        /* Write the values of the macro variables created in #5b to the log. */
+141        %put In Person=&count_in_person;
+In Person=560436601
+142        %put Hybrid=&count_hybrid;
+Hybrid=800808243
+143        %put Remote=&count_remote;
+Remote=425175008
+144        %put Tots=&tots;
+Tots=1786419852
+145        
+146        /* ------------------------Question 7------------------------*/
+147        /* Generate a horizontal bar chart of the frequency of the learning modality variable in the
+3                                                          The SAS System                    Saturday, November 25, 2023 11:17:21 PM
+
+148        learn_modality data set. */
+149        title1 "&macrotitle.";
+150        title2 "Overall Student Total = &tots.";
+151        
+152        proc sgplot data=classDat.learn_modalities;
+153            hbar learning_modality / stat=freq datalabel;
+154            xaxis label = 'Frequency';
+155            yaxis label = 'Learning Modality';
+156        run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.20 seconds
+      cpu time            0.13 seconds
+      
+NOTE: There were 429865 observations read from the data set CLASSDAT.LEARN_MODALITIES.
+
+157        
+158        /* ------------------------Question 8------------------------*/
+159        /* Programmatically (meaning you can’t use %LET) create a macro variable containing a list
+160        of the names of the character variables from the ae data set in the course folder. The
+161        variables should be listed in the order they appear in the data set. Use the code below
+162        as a template. */
+163        
+164        * get variable info;
+165        proc contents data=classDat.ae out=ae_contents(where=(type=2)) noprint;
+166        run;
+
+NOTE: The data set WORK.AE_CONTENTS has 10 observations and 41 variables.
+NOTE: PROCEDURE CONTENTS used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+167        * sort variable info;
+168        proc sort data=ae_contents;
+169        	by varnum;
+170        run;
+
+NOTE: There were 10 observations read from the data set WORK.AE_CONTENTS.
+NOTE: The data set WORK.AE_CONTENTS has 10 observations and 41 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+171        data _null_;
+172        	set ae_contents end=last;
+173        	length varlist $500;
+174        	retain varlist;
+175        		varlist = catx(' ', varlist, name); * concatenate names into macroname;
+176        	if last then call symputx('macrovarlist', varlist);
+177        run;
+
+NOTE: There were 10 observations read from the data set WORK.AE_CONTENTS.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+4                                                          The SAS System                    Saturday, November 25, 2023 11:17:22 PM
+
+
+178        
+179        * %put &=macrovarlist;
+180        
+181        /* ------------------------Question 9------------------------*/
+182        /* Using the macro variable created in #9, an ARRAY statement, and a DO loop, change the
+183        values of the character variables in the ae data set to be all lowercase. */
+184        data ae_lower;
+185        	set classDat.ae;
+186        	array characters {*} &macrovarlist.;
+187        	do i = 1 to dim(characters);
+188        		characters{i} = lowcase(characters{i});
+189        	end;
+190        	drop i;
+191        run;
+
+NOTE: There were 1177 observations read from the data set CLASSDAT.AE.
+NOTE: The data set WORK.AE_LOWER has 1177 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+192        
+193        /* ------------------------Question 10------------------------*/
+194        /* Print five observations from the data set created in #9. */
+195        title1 macrotitle;
+196        proc print data=ae_lower (obs=5) noobs;
+197        	var &macrovarlist.;
+198        run;
+
+NOTE: There were 5 observations read from the data set WORK.AE_LOWER.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.02 seconds
+      
+
+199        
+200        /* ------------------------Question 11------------------------*/
+201        /* Create a series of macro variables, vstest1 – vstestN. Each macro variable will hold the
+202        code name of one of the vital sign tests from the vs data set in the course folder.
+203        Create a second series of macro variables containing the corresponding full name of the
+204        test, vsname1 – vsnameN. Use the code below as a template. */
+205        proc sort data=classDat.vs (keep=vstestcd vstest) out=vs_sort nodupkey;
+206        	by vstestcd vstest;
+207        run;
+
+NOTE: There were 15050 observations read from the data set CLASSDAT.VS.
+NOTE: 15045 observations with duplicate key values were deleted.
+NOTE: The data set WORK.VS_SORT has 5 observations and 2 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+208        
+209        data _null_;
+210        	set vs_sort;
+5                                                          The SAS System                    Saturday, November 25, 2023 11:17:22 PM
+
+211        	call symputx(cats('vstest', _n_), vstestcd);
+212        	call symputx(cats('vsname', _n_), vstest);
+213        run;
+
+NOTE: There were 5 observations read from the data set WORK.VS_SORT.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+214        
+215        /* ------------------------Question 12------------------------*/
+216        /* Create a report, using PROC REPORT, based on the vs data set. */
+217        title1 "&macrotitle.";
+218        title2 "Value = &vsname1.";
+219        proc report data=classDat.vs;
+220        	where vstestcd = "&vstest1."; * Subset the table to show only records for the tests that match vstest1;
+221        	
+222        	* Use the report-items: visit number, visit name, and result;
+223        	columns visitnum visit vsstresn;
+224        	
+225        	* ordered and consolidated by the visit number;
+226            define visitnum / group order=internal noprint;
+227        
+228            * ordered and consolidated by the visit name;
+229            define visit / group order=internal;
+230        
+231            * request the mean statistic for the vital sign result;
+232            define vsstresn / mean 'Mean Stat';
+233        run;
+
+NOTE: There were 3612 observations read from the data set CLASSDAT.VS.
+      WHERE vstestcd='DIABP';
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.03 seconds
+      
+
+234        
+235        
+236        /* ------------------------Question 13------------------------*/
+237        /* Repeat #12 for each of the remaining vstest values. */
+238        title1 "&macrotitle.";
+239        title2 "Value = &vsname2.";
+240        proc report data=classDat.vs;
+241        	where vstestcd = "&vstest2.";
+242        	columns visitnum visit vsstresn;
+243            define visitnum / group order=internal noprint;
+244            define visit / group order=internal;
+245            define vsstresn / mean 'Mean Stat';
+246        run;
+
+NOTE: There were 602 observations read from the data set CLASSDAT.VS.
+      WHERE vstestcd='HEIGHT';
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+6                                                          The SAS System                    Saturday, November 25, 2023 11:17:22 PM
+
+
+247        
+248        title1 "&macrotitle.";
+249        title2 "Value = &vsname3.";
+250        proc report data=classDat.vs;
+251        	where vstestcd = "&vstest3.";
+252        	columns visitnum visit vsstresn;
+253            define visitnum / group order=internal noprint;
+254            define visit / group order=internal;
+255            define vsstresn / mean 'Mean Stat';
+256        run;
+
+NOTE: There were 3612 observations read from the data set CLASSDAT.VS.
+      WHERE vstestcd='HR';
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.03 seconds
+      
+
+257        
+258        title1 "&macrotitle.";
+259        title2 "Value = &vsname4.";
+260        proc report data=classDat.vs;
+261        	where vstestcd = "&vstest4.";
+262        	columns visitnum visit vsstresn;
+263            define visitnum / group order=internal noprint;
+264            define visit / group order=internal;
+265            define vsstresn / mean 'Mean Stat';
+266        run;
+
+NOTE: There were 3612 observations read from the data set CLASSDAT.VS.
+      WHERE vstestcd='SYSBP';
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+267        
+268        title1 "&macrotitle.";
+269        title2 "Value = &vsname5.";
+270        proc report data=classDat.vs;
+271        	where vstestcd = "&vstest5.";
+272        	columns visitnum visit vsstresn;
+273            define visitnum / group order=internal noprint;
+274            define visit / group order=internal;
+275            define vsstresn / mean 'Mean Stat';
+276        run;
+
+NOTE: There were 3612 observations read from the data set CLASSDAT.VS.
+      WHERE vstestcd='WEIGHT';
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+277        
+278        /* ------------------------CLOSING------------------------*/
+279        ods pdf close;
+7                                                          The SAS System                    Saturday, November 25, 2023 11:17:22 PM
+
+NOTE: ODS PDF printed 7 pages to /home/u63543119/BIOS511/Output/lab23_730460523.pdf.
+280        
+281        proc printto; run;
+
